@@ -5,10 +5,10 @@
 #include <device_launch_parameters.h>
 #include <chrono>
 
-//Pour le moment la partie multiplication du produit scalaire est effectuée sur device, 
-//mais la somme est encore sur l'hote...
+//At the moment the products needed for vector dot product are computed on the device, 
+//however the sum is computed on the host...
 
-__global__ void produitPasScalaire(float* a, float* b, float* c, int n) {
+__global__ void dotProduct(float* a, float* b, float* c, int n) {
 
     int tid = (blockIdx.x * blockDim.x) + threadIdx.x;
 
@@ -30,7 +30,7 @@ float sum(float* a, int n) {
 
 int main() {
 
-    //Evènement CUDA pour mesurer le temps d'execution sur le GPU
+    //CudaEvents are used to measure the execution time on the GPU
     cudaEvent_t startGPU;
     cudaEvent_t stopGPU;
     cudaEventCreate(&startGPU);
@@ -64,16 +64,16 @@ int main() {
     int NUM_THREADS = 256;
     int NUM_BLOCKS = (int)ceil(N / NUM_THREADS);
 
-    //On fait les multiplication sur le GPU
+    //Doing products on the device
     cudaEventRecord(startGPU);
-    produitPasScalaire <<<NUM_BLOCKS, NUM_THREADS>>> (d_a, d_b, d_c, N);
+    dotProduct <<<NUM_BLOCKS, NUM_THREADS>>> (d_a, d_b, d_c, N);
     cudaEventRecord(stopGPU);
 
     cudaMemcpy(h_c, d_c, bytes, cudaMemcpyDeviceToHost);
 
     cudaEventSynchronize(stopGPU);
 
-    //On fait la somme sur l'hote
+    //Doing the sum on the host
     auto startCPU = std::chrono::high_resolution_clock::now();
     float res = sum(h_c, N);
     auto stopCPU = std::chrono::high_resolution_clock::now();
@@ -83,11 +83,11 @@ int main() {
     cudaEventElapsedTime(&milliseconds, startGPU, stopGPU);
     
 
-    std::cout << "Resultat du produit scalaire : " << res << std::endl;
+    std::cout << "Dot product results : " << res << std::endl;
 
-    std::cout << "Temps d'execution GPU : " << milliseconds << " ms . " << std::endl;
-
-    std::cout << "Temps d'execution CPU : " << millisecondsCPU.count() << " ms ." << std::endl;
+    std::cout << "GPU execution time : " << milliseconds << " ms . " << std::endl;
+    
+    std::cout << "CPU execution time : " << millisecondsCPU.count() << " ms ." << std::endl;
 
     std::cout << std::endl;
     return 0;
