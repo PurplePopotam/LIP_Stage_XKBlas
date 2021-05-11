@@ -4,18 +4,11 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 #include <chrono>
+#include "kernels.cuh"
+
 
 //At the moment the products needed for vector dot product are computed on the device, 
 //however the sum is computed on the host...
-
-__global__ void dotProduct(float* a, float* b, float* c, int n) {
-
-    int tid = (blockIdx.x * blockDim.x) + threadIdx.x;
-
-    if (tid < n) {
-        c[tid] = a[tid] * b[tid];
-    }
-}
 
 float sum(float* a, int n) {
     float res = 0.0f;
