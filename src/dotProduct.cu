@@ -86,9 +86,9 @@ int main() {
     std::cout << "Dot product results : " << res << std::endl;
 
     std::cout << "GPU execution time : " << milliseconds << " ms . " << std::endl;
-    
-    std::cout << "CPU execution time : " << millisecondsCPU.count() << " ms ." << std::endl;
-
+    std::cout << "GPU bandwidth : " << N * 3 / milliseconds / 1e6 << " GB/s ." << std::endl;    //Only 3 W/R operations in the dotProduct kernel
+    std::cout << "CPU execution time : " << millisecondsCPU.count() << " ms ." << std::endl;    //Only 2 W/R operations in the sum function
+    std::cout << "CPU bandwidth : " << N * 2 / millisecondsCPU.count() / 1e6 << " GB/s ." << std::endl;
     std::cout << std::endl;
     return 0;
 }
