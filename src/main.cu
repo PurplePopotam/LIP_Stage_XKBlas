@@ -6,7 +6,8 @@
 #include <chrono>
 #include "kernels.cuh"
 
-
+//Test push to 2 remotes
+// 
 //At the moment the products needed for vector dot product are computed on the device, 
 //however the sum is computed on the host...
 
