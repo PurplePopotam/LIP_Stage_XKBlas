@@ -1,7 +1,6 @@
 ﻿#include <stdio.h>
 #include <cassert>
 #include <iostream>
-#include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 #include <chrono>
 #include "kernels.cuh"
@@ -11,11 +10,13 @@
 //At the moment the products needed for vector dot product are computed on the device, 
 //however the sum is computed on the host...
 
-float sum(float* a, int n) {
+#define N 2000000
+#define THREADS_PER_BLOCK 512
+float cpuDotProduct(float* a, float* b, int n) {
     float res = 0.0f;
 
     for (int i = 0; i < n; i++) {
-        res += a[i];
+        res += a[i] * b[i];
     }
 
     return res;
@@ -31,45 +32,46 @@ int main() {
     cudaEventCreate(&stopGPU);
     float milliseconds;
 
-    int N = 20000000;
+
 
     float* h_a, * h_b, * h_c;
     float* d_a, * d_b, * d_c;
 
     h_a = new float[N];
     h_b = new float[N];
-    h_c = new float[N];
+    h_c = new float;
 
     size_t bytes = sizeof(float) * N;
 
     cudaMalloc(&d_a, bytes);
     cudaMalloc(&d_b, bytes);
-    cudaMalloc(&d_c, bytes);
+    cudaMalloc(&d_c, sizeof(float));
 
     for (size_t i = 0; i < N; i++) {
-        h_a[i] = rand() % 100;
-        h_b[i] = rand() % 100;
-        h_c[i] = 0;
+        h_a[i] = rand() % 10;
+        h_b[i] = rand() % 10;
     }
+    *h_c = 0;
 
     cudaMemcpy(d_a, h_a, bytes, cudaMemcpyHostToDevice);
     cudaMemcpy(d_b, h_b, bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_c, h_c, sizeof(float), cudaMemcpyHostToDevice);
 
-    int NUM_THREADS = 256;
-    int NUM_BLOCKS = (int)ceil(N / NUM_THREADS);
+    int NUM_THREADS = 512;
+    int NUM_BLOCKS = N / THREADS_PER_BLOCK;
 
-    //Doing products on the device
+    //Doing the dot product on the device
     cudaEventRecord(startGPU);
     dotProduct <<<NUM_BLOCKS, NUM_THREADS>>> (d_a, d_b, d_c, N);
     cudaEventRecord(stopGPU);
 
-    cudaMemcpy(h_c, d_c, bytes, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_c, d_c, sizeof(float), cudaMemcpyDeviceToHost);
 
     cudaEventSynchronize(stopGPU);
 
-    //Doing the sum on the host
+    //Doing the dot product on the host
     auto startCPU = std::chrono::high_resolution_clock::now();
-    float res = sum(h_c, N);
+    float res = cpuDotProduct(h_a, h_b, N);
     auto stopCPU = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::milli> millisecondsCPU = stopCPU - startCPU;
@@ -77,12 +79,15 @@ int main() {
     cudaEventElapsedTime(&milliseconds, startGPU, stopGPU);
     
 
-    std::cout << "Dot product results : " << res << std::endl;
-
+    std::cout << "Dot product results on CPU : " << res << std::endl;
+    std::cout << "Dot product results on GPU : " << *h_c << std::endl;
+    std::cout << std::endl;
     std::cout << "GPU execution time : " << milliseconds << " ms . " << std::endl;
-    std::cout << "GPU bandwidth : " << N * 3 / milliseconds / 1e6 << " GB/s ." << std::endl;    //Only 3 W/R operations in the dotProduct kernel
-    std::cout << "CPU execution time : " << millisecondsCPU.count() << " ms ." << std::endl;    //Only 2 W/R operations in the sum function
-    std::cout << "CPU bandwidth : " << N * 2 / millisecondsCPU.count() / 1e6 << " GB/s ." << std::endl;
+    std::cout << "GPU bandwidth : " << N * 6 / milliseconds / 1e6 << " GB/s ." << std::endl;    //6 W/R operations in the dotProduct kernel
+    std::cout << std::endl;
+    std::cout << "CPU execution time : " << millisecondsCPU.count() << " ms ." << std::endl;    
+    std::cout << "CPU bandwidth : " << N * 3 / millisecondsCPU.count() / 1e6 << " GB/s ." << std::endl; //3 W/R operations in the cpuDotProduct function
+
     std::cout << std::endl;
     return 0;
 }
