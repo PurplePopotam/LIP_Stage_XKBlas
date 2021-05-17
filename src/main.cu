@@ -62,7 +62,7 @@ int main() {
 
     //Doing the dot product on the device
     cudaEventRecord(startGPU);
-    dotProduct <<<NUM_BLOCKS, NUM_THREADS>>> (d_a, d_b, d_c, N);
+    dotProductV2 <<<NUM_BLOCKS, NUM_THREADS>>> (d_a, d_b, d_c, N);
     cudaEventRecord(stopGPU);
 
     cudaMemcpy(h_c, d_c, sizeof(float), cudaMemcpyDeviceToHost);

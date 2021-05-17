@@ -12,8 +12,7 @@ __global__ void Product(float* a, float* b, float* c, int n) {
     }
 }
 
-__global__ void dotProduct(float* a, float* b, float* c, int n) {
-
+__global__ void dotProductV1(float* a, float* b, float* c, unsigned int n) {
 
     __shared__ float temp[THREADS_PER_BLOCK];
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
@@ -28,4 +27,38 @@ __global__ void dotProduct(float* a, float* b, float* c, int n) {
         }
         atomicAdd(c, res);
     }
+}
+
+__global__ void dotProductV2(float* x, float* y, float* dot, unsigned int n) {
+
+	unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
+	unsigned int stride = blockDim.x * gridDim.x;
+
+	__shared__ float cache[THREADS_PER_BLOCK];
+
+	double temp = 0.0;
+	while (index < n) {
+		temp += x[index] * y[index];
+
+		index += stride;
+	}
+
+	cache[threadIdx.x] = temp;
+
+	__syncthreads();
+
+	// reduction
+	unsigned int i = blockDim.x / 2;
+	while (i != 0) {
+		if (threadIdx.x < i) {
+			cache[threadIdx.x] += cache[threadIdx.x + i];
+		}
+		__syncthreads();
+		i /= 2;
+	}
+
+
+	if (threadIdx.x == 0) {
+		atomicAdd(dot, cache[0]);
+	}
 }
