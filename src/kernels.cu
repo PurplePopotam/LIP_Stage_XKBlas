@@ -107,3 +107,4 @@ __global__ void dotProductV3(float* x, float* y, float* dot, unsigned int n) {
 		atomicAdd(dot, cache[0]);
 	}
 }
+

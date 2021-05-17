@@ -7,7 +7,9 @@
 
 
 #define N 4000000
-#define THREADS_PER_BLOCK 512
+#define THREADS_PER_BLOCK 64
+
+
 float cpuDotProduct(float* a, float* b, int n) {
     float res = 0.0f;
 
@@ -53,12 +55,35 @@ int main() {
     cudaMemcpy(d_b, h_b, bytes, cudaMemcpyHostToDevice);
     cudaMemcpy(d_c, h_c, sizeof(float), cudaMemcpyHostToDevice);
 
-    int NUM_THREADS = 512;
     int NUM_BLOCKS = N / THREADS_PER_BLOCK;
 
     //Doing the dot product on the device
     cudaEventRecord(startGPU);
-    dotProductV3 <<<NUM_BLOCKS, NUM_THREADS>>> (d_a, d_b, d_c, N);
+    
+    switch (THREADS_PER_BLOCK) {
+    case 512:
+        dotProductV4<512> <<<NUM_BLOCKS, THREADS_PER_BLOCK>>> (d_a, d_b, d_c, N); break;
+    case 256:
+        dotProductV4<256> <<<NUM_BLOCKS, THREADS_PER_BLOCK>>> (d_a, d_b, d_c, N); break;
+    case 128:
+        dotProductV4<128> <<<NUM_BLOCKS, THREADS_PER_BLOCK>>> (d_a, d_b, d_c, N); break;
+    case 64:
+        dotProductV4<64> <<<NUM_BLOCKS, THREADS_PER_BLOCK>>> (d_a, d_b, d_c, N); break;
+    case 32:
+        dotProductV4<32> << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N); break;
+    case 16:
+        dotProductV4<16> << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N); break;
+    case 8:
+        dotProductV4<8> << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N); break;
+    case 4:
+        dotProductV4<4> << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N); break;
+    case 2:
+        dotProductV4<2> << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N); break;
+    case 1:
+        dotProductV4<1> << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N); break;
+    } 
+    
+    //dotProductV3 << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N);
     cudaEventRecord(stopGPU);
 
     cudaMemcpy(h_c, d_c, sizeof(float), cudaMemcpyDeviceToHost);
