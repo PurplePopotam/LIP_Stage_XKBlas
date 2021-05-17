@@ -5,12 +5,8 @@
 #include <chrono>
 #include "kernels.cuh"
 
-//Test push to 2 remotes
-// 
-//At the moment the products needed for vector dot product are computed on the device, 
-//however the sum is computed on the host...
 
-#define N 2000000
+#define N 4000000
 #define THREADS_PER_BLOCK 512
 float cpuDotProduct(float* a, float* b, int n) {
     float res = 0.0f;
@@ -83,7 +79,7 @@ int main() {
     std::cout << "Dot product results on GPU : " << *h_c << std::endl;
     std::cout << std::endl;
     std::cout << "GPU execution time : " << milliseconds << " ms . " << std::endl;
-    std::cout << "GPU bandwidth : " << N * 6 / milliseconds / 1e6 << " GB/s ." << std::endl;    //6 W/R operations in the dotProduct kernel
+    //std::cout << "GPU bandwidth : " << N * 6 / milliseconds / 1e6 << " GB/s ." << std::endl;    //Not the accurate numbre of flops 
     std::cout << std::endl;
     std::cout << "CPU execution time : " << millisecondsCPU.count() << " ms ." << std::endl;    
     std::cout << "CPU bandwidth : " << N * 3 / millisecondsCPU.count() / 1e6 << " GB/s ." << std::endl; //3 W/R operations in the cpuDotProduct function

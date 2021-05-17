@@ -47,7 +47,6 @@ __global__ void dotProductV2(float* x, float* y, float* dot, unsigned int n) {
 
 	__syncthreads();
 
-	// reduction
 	unsigned int i = blockDim.x / 2;
 	while (i != 0) {
 		if (threadIdx.x < i) {
@@ -61,4 +60,12 @@ __global__ void dotProductV2(float* x, float* y, float* dot, unsigned int n) {
 	if (threadIdx.x == 0) {
 		atomicAdd(dot, cache[0]);
 	}
+}
+
+__global__ void dotProductV3(float* x, float* y, float* dot, unsigned int n) {
+
+	__shared__ float cache[THREADS_PER_BLOCK];
+	unsigned int tid = threadIdx.x;	//Thread id in the block
+	unsigned int index = blockIdx.x * blockDim.x + tid;	//global id
+
 }
