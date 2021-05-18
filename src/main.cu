@@ -6,12 +6,15 @@
 #include "kernels.cuh"
 
 
-#define N 4000000
-#define THREADS_PER_BLOCK 64
+#define N 20000000
 
+//Prise de temps CPU des kernels 
+//Prise de temps séparemment des transfert de données
+//Boucle pour mesurer sur plusieurs lancements
+//
 
-float cpuDotProduct(float* a, float* b, int n) {
-    float res = 0.0f;
+myFloat cpuDotProduct(myFloat* a, myFloat* b, int n) {
+    myFloat res = 0.0f;
 
     for (int i = 0; i < n; i++) {
         res += a[i] * b[i];
@@ -30,20 +33,18 @@ int main() {
     cudaEventCreate(&stopGPU);
     float milliseconds;
 
+    myFloat* h_a, * h_b, * h_c;
+    myFloat* d_a, * d_b, * d_c;
 
+    h_a = new myFloat[N];
+    h_b = new myFloat[N];
+    h_c = new myFloat;
 
-    float* h_a, * h_b, * h_c;
-    float* d_a, * d_b, * d_c;
-
-    h_a = new float[N];
-    h_b = new float[N];
-    h_c = new float;
-
-    size_t bytes = sizeof(float) * N;
+    size_t bytes = sizeof(myFloat) * N;
 
     cudaMalloc(&d_a, bytes);
     cudaMalloc(&d_b, bytes);
-    cudaMalloc(&d_c, sizeof(float));
+    cudaMalloc(&d_c, sizeof(myFloat));
 
     for (size_t i = 0; i < N; i++) {
         h_a[i] = rand() % 10;
@@ -53,46 +54,22 @@ int main() {
 
     cudaMemcpy(d_a, h_a, bytes, cudaMemcpyHostToDevice);
     cudaMemcpy(d_b, h_b, bytes, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_c, h_c, sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_c, h_c, sizeof(myFloat), cudaMemcpyHostToDevice);
 
     int NUM_BLOCKS = N / THREADS_PER_BLOCK;
 
     //Doing the dot product on the device
-    cudaEventRecord(startGPU);
-    
-    switch (THREADS_PER_BLOCK) {
-    case 512:
-        dotProductV4<512> <<<NUM_BLOCKS, THREADS_PER_BLOCK>>> (d_a, d_b, d_c, N); break;
-    case 256:
-        dotProductV4<256> <<<NUM_BLOCKS, THREADS_PER_BLOCK>>> (d_a, d_b, d_c, N); break;
-    case 128:
-        dotProductV4<128> <<<NUM_BLOCKS, THREADS_PER_BLOCK>>> (d_a, d_b, d_c, N); break;
-    case 64:
-        dotProductV4<64> <<<NUM_BLOCKS, THREADS_PER_BLOCK>>> (d_a, d_b, d_c, N); break;
-    case 32:
-        dotProductV4<32> << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N); break;
-    case 16:
-        dotProductV4<16> << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N); break;
-    case 8:
-        dotProductV4<8> << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N); break;
-    case 4:
-        dotProductV4<4> << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N); break;
-    case 2:
-        dotProductV4<2> << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N); break;
-    case 1:
-        dotProductV4<1> << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N); break;
-    } 
-    
-    //dotProductV3 << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N);
+    cudaEventRecord(startGPU); 
+    dotProductV3 <<<NUM_BLOCKS, THREADS_PER_BLOCK >>> (d_a, d_b, d_c, N);
     cudaEventRecord(stopGPU);
-
-    cudaMemcpy(h_c, d_c, sizeof(float), cudaMemcpyDeviceToHost);
 
     cudaEventSynchronize(stopGPU);
 
+    cudaMemcpy(h_c, d_c, sizeof(myFloat), cudaMemcpyDeviceToHost);
+
     //Doing the dot product on the host
     auto startCPU = std::chrono::high_resolution_clock::now();
-    float res = cpuDotProduct(h_a, h_b, N);
+    myFloat res = cpuDotProduct(h_a, h_b, N);
     auto stopCPU = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::milli> millisecondsCPU = stopCPU - startCPU;

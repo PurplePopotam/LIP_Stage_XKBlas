@@ -1,9 +1,8 @@
 ﻿#include "kernels.cuh"
 #include "stdio.h"
 
-#define THREADS_PER_BLOCK 512
 
-__global__ void Product(float* a, float* b, float* c, int n) {
+__global__ void Product(myFloat* a, myFloat* b, myFloat* c, int n) {
 
     int tid = (blockIdx.x * blockDim.x) + threadIdx.x;
 
@@ -12,7 +11,7 @@ __global__ void Product(float* a, float* b, float* c, int n) {
     }
 }
 
-__device__ void warpReduce(float* sdata, unsigned int tid) {
+__device__ void warpReduce(myFloat* sdata, unsigned int tid) {
 
 	sdata[tid] += sdata[tid + 32];
 	sdata[tid] += sdata[tid + 16];
@@ -23,16 +22,16 @@ __device__ void warpReduce(float* sdata, unsigned int tid) {
 }
 
 
-__global__ void dotProductV1(float* a, float* b, float* c, unsigned int n) {
+__global__ void dotProductV1(myFloat* a, myFloat* b, myFloat* c, unsigned int n) {
 
-    __shared__ float temp[THREADS_PER_BLOCK];
+    __shared__ myFloat temp[THREADS_PER_BLOCK];
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     temp[threadIdx.x] = a[tid] * b[tid];
 
     __syncthreads();
 
     if (threadIdx.x == 0) {
-        float res = 0;
+        myFloat res = 0;
         for (int i = 0; i < THREADS_PER_BLOCK; i++) {
             res += temp[i];
         }
@@ -40,14 +39,14 @@ __global__ void dotProductV1(float* a, float* b, float* c, unsigned int n) {
     }
 }
 
-__global__ void dotProductV2(float* x, float* y, float* dot, unsigned int n) {
+__global__ void dotProductV2(myFloat* x, myFloat* y, myFloat* dot, unsigned int n) {
 
 	unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
 	unsigned int stride = blockDim.x * gridDim.x;
 
-	__shared__ float cache[THREADS_PER_BLOCK];
+	__shared__ myFloat cache[THREADS_PER_BLOCK];
 
-	double temp = 0.0;
+	myFloat temp = 0.0;
 	while (index < n) {
 		temp += x[index] * y[index];
 
@@ -64,7 +63,7 @@ __global__ void dotProductV2(float* x, float* y, float* dot, unsigned int n) {
 			cache[threadIdx.x] += cache[threadIdx.x + i];
 		}
 		__syncthreads();
-		i /= 2;
+		i >>= 1;
 	}
 
 
@@ -73,14 +72,14 @@ __global__ void dotProductV2(float* x, float* y, float* dot, unsigned int n) {
 	}
 }
 
-__global__ void dotProductV3(float* x, float* y, float* dot, unsigned int n) {
+__global__ void dotProductV3(myFloat* x, myFloat* y, myFloat* dot, unsigned int n) {
 
-	__shared__ float cache[THREADS_PER_BLOCK];
+	__shared__ myFloat cache[THREADS_PER_BLOCK];
 
 	unsigned int tid = threadIdx.x;	
 	unsigned int index = blockIdx.x * blockDim.x + tid;	
 
-	double temp = 0.0;
+	myFloat temp = 0.0;
 	while (index < n) {
 		temp += x[index] * y[index];
 		index += blockDim.x * gridDim.x;

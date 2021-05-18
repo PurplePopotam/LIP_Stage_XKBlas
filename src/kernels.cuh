@@ -2,20 +2,21 @@
 #define __KERNELS_CUH__
 #include <cuda_runtime.h>
 
-#define THREADS_PER_BLOCK 512
+#define THREADS_PER_BLOCK 256
+typedef double myFloat;
 
-__global__ void Product(float* a, float* b, float* c, int n);
+__global__ void Product(myFloat* a, myFloat* b, myFloat* c, int n);
 
-__global__ void dotProductV1(float* a, float* b, float* c, unsigned int n);	//Sum reduction on 1 thread...
+__global__ void dotProductV1(myFloat* a, myFloat* b, myFloat* c, unsigned int n);	//Sum reduction on 1 thread...
 
-__global__ void dotProductV2(float* x, float* y, float* dot, unsigned int n);	//Youtube tuto 
+__global__ void dotProductV2(myFloat* x, myFloat* y, myFloat* dot, unsigned int n);	//Youtube tuto 
 
-__global__ void dotProductV3(float* x, float* y, float* dot, unsigned int n); //NVIDIA webinar2 slides, unroll last warp
+__global__ void dotProductV3(myFloat* x, myFloat* y, myFloat* dot, unsigned int n); //NVIDIA webinar2 slides, unroll last warp
 
-__device__ void warpReduce(volatile float* sdata, unsigned int tid);
+__device__ void warpReduce(volatile myFloat* sdata, unsigned int tid);
 
 template <unsigned int blockSize>
-__device__ void warpReduceT(volatile float* sdata, unsigned int tid) {
+__device__ void warpReduceT(volatile myFloat* sdata, unsigned int tid) {
 	if (blockSize >= 64) sdata[tid] += sdata[tid + 32];
 	if (blockSize >= 32) sdata[tid] += sdata[tid + 16];
 	if (blockSize >= 16) sdata[tid] += sdata[tid + 8];
@@ -27,13 +28,13 @@ __device__ void warpReduceT(volatile float* sdata, unsigned int tid) {
 //Complete unroll using templates
 
 template <unsigned int blockSize>
-__global__ void dotProductV4(float* x, float* y, float* dot, unsigned int n) {	
-	__shared__ float cache[THREADS_PER_BLOCK];
+__global__ void dotProductV4(myFloat* x, myFloat* y, myFloat* dot, unsigned int n) {	
+	__shared__ myFloat cache[blockSize];
 
 	unsigned int tid = threadIdx.x;
 	unsigned int index = blockIdx.x * blockDim.x + tid;
 
-	double temp = 0.0;
+	myFloat temp = 0.0;
 	while (index < n) {
 		temp += x[index] * y[index];
 		index += blockDim.x * gridDim.x;
