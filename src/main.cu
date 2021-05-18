@@ -6,7 +6,6 @@
 #include "kernels.cuh"
 
 
-#define N 20000000
 #define ITER 10
 
 //Prise de temps CPU des kernels 
@@ -25,7 +24,9 @@ myFloat cpuDotProduct(myFloat* a, myFloat* b, int n) {
 }
 
 
-int main() {
+int main(int argc, char** argv) {
+
+    #define N atoi(argv[1])
 
     //CudaEvents are used to measure the execution time on the GPU
     bool debug = false;
