@@ -2,8 +2,8 @@
 #define __KERNELS_CUH__
 #include <cuda_runtime.h>
 
-#define THREADS_PER_BLOCK 256
-typedef double myFloat;
+#define THREADS_PER_BLOCK 512
+typedef float myFloat;
 
 __global__ void Product(myFloat* a, myFloat* b, myFloat* c, int n);
 
