@@ -37,21 +37,11 @@ int main(int argc, char** argv) {
     cudaEventCreate(&stopGPU);
     float milliseconds;
 
-    std::chrono::steady_clock::time_point startCPUhost;
-    std::chrono::steady_clock::time_point stopCPUhost;
     std::chrono::duration<double, std::milli> millisecondsCPUhost;
-
-    std::chrono::steady_clock::time_point startCPUdevice;
-    std::chrono::steady_clock::time_point stopCPUdevice;
     std::chrono::duration<double, std::milli> millisecondsCPUdevice;
-
-    std::chrono::steady_clock::time_point startDeviceHostCopy;
-    std::chrono::steady_clock::time_point stopDeviceHostCopy;
     std::chrono::duration<double, std::milli> millisecondsDeviceHostCopy;
 
-    myFloat* h_a, * h_b, * h_c;
-    myFloat* d_a, * d_b, * d_c;
-    myFloat resCPU;
+    
     size_t bytes = sizeof(myFloat) * N;
 
     std::cout << "DotProduct of " << N/1000000 << "M elements, using " << THREADS_PER_BLOCK << " threads per block. " << std::endl;
@@ -59,6 +49,11 @@ int main(int argc, char** argv) {
     std::cout << "Iteration " << " | " << "CPU host exec time" << " | " << "GPU device exec time" << " | " << "CPU device exec time" << " | " << "device -> host copy duration" << std::endl;
 
     for (size_t i = 0; i < ITER; i++) {
+
+        myFloat* h_a, * h_b, * h_c;
+        myFloat* d_a, * d_b, * d_c;
+        myFloat resCPU;
+
         h_a = new myFloat[N];
         h_b = new myFloat[N];
         h_c = new myFloat;
@@ -81,28 +76,28 @@ int main(int argc, char** argv) {
 
         //Doing the dot product on the host
 
-        startCPUhost = std::chrono::high_resolution_clock::now();
+        auto startCPUhost = std::chrono::high_resolution_clock::now();
         resCPU = cpuDotProduct(h_a, h_b, N);
-        stopCPUhost = std::chrono::high_resolution_clock::now();
+        auto stopCPUhost = std::chrono::high_resolution_clock::now();
         
         millisecondsCPUhost = stopCPUhost - startCPUhost;
 
         //Doing the dot product on the device
 
-        startCPUdevice = std::chrono::high_resolution_clock::now();
+        auto startCPUdevice = std::chrono::high_resolution_clock::now();
         cudaEventRecord(startGPU);
 
         dotProductV3 << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N);
 
         cudaEventRecord(stopGPU);
         cudaEventSynchronize(stopGPU);
-        stopCPUdevice = std::chrono::high_resolution_clock::now();
+        auto stopCPUdevice = std::chrono::high_resolution_clock::now();
 
         millisecondsCPUdevice = stopCPUdevice - startCPUdevice;
 
-        startDeviceHostCopy = std::chrono::high_resolution_clock::now();
+        auto startDeviceHostCopy = std::chrono::high_resolution_clock::now();
         cudaMemcpy(h_c, d_c, sizeof(myFloat), cudaMemcpyDeviceToHost);
-        stopDeviceHostCopy = std::chrono::high_resolution_clock::now();
+        auto stopDeviceHostCopy = std::chrono::high_resolution_clock::now();
 
         millisecondsDeviceHostCopy = stopDeviceHostCopy - startDeviceHostCopy;
 
@@ -123,11 +118,6 @@ int main(int argc, char** argv) {
         cudaFree(&d_a); cudaFree(&d_b); cudaFree(&d_c);
         delete(h_a); delete(h_b); delete(h_c);
     }
-    
 
-    
-    
-    
-    
     return 0;
 }
