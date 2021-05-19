@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DA8B3F1F-7154-4A80-9D9D-F7A1248DDC70}</ProjectGuid>
     <RootNamespace>VSCUDA_Test</RootNamespace>
-    <ProjectName>CUDA_Programming</ProjectName>
+    <ProjectName>dot product</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -82,11 +82,18 @@
     <CudaLink />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="src\main.cu" />
-    <CudaCompile Include="src\kernels.cu" />
+    <CudaCompile Include="src\dotProduct\kernels.cu" />
+    <CudaCompile Include="src\dotProduct\main.cu" />
+    <CudaCompile Include="src\matrixMul\kernels.cu" />
+    <CudaCompile Include="src\matrixMul\main.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\kernels.cuh" />
+    <ClInclude Include="src\dotProduct\kernels.cuh" />
+    <ClInclude Include="src\matrixMul\kernels.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\dotProduct\makefile" />
+    <None Include="src\matrixMul\makefile" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

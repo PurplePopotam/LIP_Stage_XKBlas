@@ -27,7 +27,6 @@ myFloat cpuDotProduct(myFloat* a, myFloat* b, int n) {
 int main(int argc, char** argv) {
 
     #define N atoi(argv[1])
-
     //CudaEvents are used to measure the execution time on the GPU
     bool debug = false;
 
@@ -58,9 +57,9 @@ int main(int argc, char** argv) {
         h_b = new myFloat[N];
         h_c = new myFloat;
 
-        cudaMalloc(&d_a, bytes);
-        cudaMalloc(&d_b, bytes);
-        cudaMalloc(&d_c, sizeof(myFloat));
+        cudaMalloc((void**)&d_a, bytes);
+        cudaMalloc((void**)&d_b, bytes);
+        cudaMalloc((void**)&d_c, sizeof(myFloat));
 
         for (size_t j = 0; j < N; j++) {
             h_a[j] = rand() % 10;
