@@ -86,10 +86,12 @@
     <CudaCompile Include="src\dotProduct\main.cu" />
     <CudaCompile Include="src\matrixMul\kernels.cu" />
     <CudaCompile Include="src\matrixMul\main.cu" />
+    <CudaCompile Include="src\matrixMul\matrix.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\dotProduct\kernels.cuh" />
     <ClInclude Include="src\matrixMul\kernels.cuh" />
+    <ClInclude Include="src\matrixMul\matrix.cuh" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\dotProduct\makefile" />
