@@ -26,6 +26,13 @@ Matrix::Matrix(const Matrix& other) {
 	}
 }
 
+Matrix::Matrix(Matrix&& other) {
+	content = other.content;
+	width = other.width;
+	other.width = 0;
+	other.content = nullptr;
+}
+
 void Matrix::display() {
 	for (size_t i = 0; i < width; i++)
 	{
@@ -38,7 +45,7 @@ void Matrix::display() {
 	std::cout << std::endl;
 }
 
-Matrix& Matrix::operator=(const Matrix& other) {
+Matrix Matrix::operator=(const Matrix& other) {
 	if (content == other.content) {
 		return *this;
 	}
@@ -52,6 +59,31 @@ Matrix& Matrix::operator=(const Matrix& other) {
 		}
 	}
 	return *this;
+}
+
+Matrix& Matrix::operator=(Matrix&& other) {
+	if (this != &other) {
+		delete content;
+		content = other.content;
+		width = other.width;
+		other.content = nullptr;
+		other.width = 0;
+	}
+
+	return *this;
+}
+
+Matrix Matrix::operator+(const Matrix& other) {
+	Matrix res(width);
+
+	for (size_t i = 0; i < width; i++)
+	{
+		for (size_t j = 0; j < width; j++)
+		{
+			res.at(i, j) = at(i,j) + other.at(i, j);
+		}
+	}
+	return res;
 }
 
 Matrix Matrix::idMatrix(const size_t& _width) {
