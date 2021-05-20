@@ -1,11 +1,10 @@
 ﻿#include "kernels.cuh"
 #include <iostream>
 
-__global__ void matrixAddV1(Matrix* A, Matrix* B, Matrix* C, unsigned int N) {
+__global__ void matrixAddV1(myFloat* A, myFloat* B, myFloat* C, unsigned int N) {
+
 	unsigned int tidX = threadIdx.x;
 	unsigned int tidY = threadIdx.y;
 
-	C->content[tidX * N + tidY] = 1;
-
-	 
+	C[tidX * N + tidY] = A[tidX * N + tidY] + B[tidX * N + tidY];
 }

@@ -8,9 +8,12 @@
 int main(int argc, char** argv) {
 
 #define N atoi(argv[1])
-#define bytes sizeof(Matrix)
+
 #define debug 1
 	
+	size_t bytes = sizeof(myFloat) * N * N;
+	dim3 BLOCK_SIZE(N, N, 1);
+
 	std::chrono::duration<double, std::milli> millisecondsCPUhost;
 
 	cudaEvent_t startGPU;
@@ -20,7 +23,8 @@ int main(int argc, char** argv) {
 	float milliseconds;
 
 	Matrix* h_A, * h_B, * h_C, * hostRes_C;
-	Matrix* d_A, * d_B, * d_C;
+	myFloat* d_A, * d_B, * d_C;
+
 	h_A = new Matrix(N);
 	h_B = new Matrix(N);
 	h_C = new Matrix(N);
@@ -35,9 +39,9 @@ int main(int argc, char** argv) {
 	*h_C = Matrix::nullMatrix(N);
 	*hostRes_C = Matrix::nullMatrix(N);
 
-	cudaMemcpy((void*)d_A, (void*)h_A, bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy((void*)d_B, (void*)h_B, bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy((void*)d_C, (void*)h_C, bytes, cudaMemcpyHostToDevice);
+	cudaMemcpy((void*)d_A, (void*)h_A->content, bytes, cudaMemcpyHostToDevice);
+	cudaMemcpy((void*)d_B, (void*)h_B->content, bytes, cudaMemcpyHostToDevice);
+	cudaMemcpy((void*)d_C, (void*)h_C->content, bytes, cudaMemcpyHostToDevice);
 
 	
 	auto startCPUhost = std::chrono::high_resolution_clock::now();
@@ -47,12 +51,12 @@ int main(int argc, char** argv) {
 	millisecondsCPUhost = stopCPUhost - startCPUhost;
 
 	cudaEventRecord(startGPU);
-	matrixAddV1 << <1, N >> > (d_A, d_B, d_C, N);
+	matrixAddV1 <<<1, BLOCK_SIZE >>> (d_A, d_B, d_C, N);
 	cudaEventRecord(stopGPU);
 
 	cudaEventSynchronize(stopGPU);
 
-	cudaMemcpy((void*)h_C, (void*)d_C, bytes, cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_C->content, (void*)d_C, bytes, cudaMemcpyDeviceToHost);
 	
 
 	cudaEventElapsedTime(&milliseconds, startGPU, stopGPU);
