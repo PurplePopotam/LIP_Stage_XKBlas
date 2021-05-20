@@ -21,7 +21,9 @@ class Matrix {
 		static Matrix nullMatrix(const size_t& width);
 		static Matrix idMatrix(const size_t& width);
 
-	private:
+		inline size_t getWidth() { return width; }
+
+	public:
 		myFloat* content;
 		size_t width;
 };

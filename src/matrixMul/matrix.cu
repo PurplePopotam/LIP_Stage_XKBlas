@@ -1,6 +1,6 @@
 ﻿#include <stdio.h>
-#include <iostream>
 #include "matrix.cuh"
+#include <iostream>
 
 Matrix::Matrix(const size_t& _width) {
 	width = _width;

@@ -89,6 +89,7 @@ int main(int argc, char** argv) {
         dotProductV3 << <NUM_BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_b, d_c, N);
 
         cudaEventRecord(stopGPU);
+
         cudaEventSynchronize(stopGPU);
         auto stopCPUdevice = std::chrono::high_resolution_clock::now();
 
