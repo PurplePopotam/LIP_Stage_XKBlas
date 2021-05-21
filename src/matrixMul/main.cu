@@ -4,15 +4,28 @@
 #include "kernels.cuh"
 #include <iostream>
 
+void check(myFloat* A, myFloat* B, unsigned int N) {
+	for (size_t i = 0; i < N; i++)
+	{
+		for (size_t j = 0; j < N; j++)
+		{
+			assert(A[i * N + j] == B[i * N + j]);
+		}
+	}
+}
 
 int main(int argc, char** argv) {
 
 #define N atoi(argv[1])
+#define THREADS_NUMBER 32
 
-#define debug 1
+#define debug 0
 	
 	size_t bytes = sizeof(myFloat) * N * N;
-	dim3 BLOCK_SIZE(N, N, 1);
+	dim3 BLOCK_SIZE(THREADS_NUMBER, THREADS_NUMBER, 1);
+	dim3 GRID_SIZE((N/THREADS_NUMBER) + 1, (N / THREADS_NUMBER) + 1, 1);
+
+	std::cout << GRID_SIZE.x << " " << GRID_SIZE.y << std::endl;
 
 	std::chrono::duration<double, std::milli> millisecondsCPUhost;
 
@@ -51,7 +64,7 @@ int main(int argc, char** argv) {
 	millisecondsCPUhost = stopCPUhost - startCPUhost;
 
 	cudaEventRecord(startGPU);
-	matrixAddV1 <<<1, BLOCK_SIZE >>> (d_A, d_B, d_C, N);
+	matrixAddV1 <<<GRID_SIZE, BLOCK_SIZE >>> (d_A, d_B, d_C, N);
 	cudaEventRecord(stopGPU);
 
 	cudaEventSynchronize(stopGPU);
@@ -68,9 +81,10 @@ int main(int argc, char** argv) {
 		h_C->display();
 	}
 	
+	//check(hostRes_C->content, h_C->content, N);
 
 	std::cout << std::endl << "Matrix addition of " << N << " elements took " << millisecondsCPUhost.count() << " ms to complete on the CPU. " << std::endl << std::endl;
 	std::cout << std::endl << "Matrix addition of " << N << " elements took " << milliseconds << " ms to complete on the GPU. " << std::endl << std::endl;
 
 	return 0;
-}
+} 
