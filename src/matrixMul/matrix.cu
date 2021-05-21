@@ -9,7 +9,7 @@ Matrix::Matrix(const size_t& _width) {
 	{
 		for (size_t j = 0; j < width; j++)
 		{
-			at(i, j) = rand() % 10;
+			at(i, j) = 0;
 		}
 	}
 }
@@ -86,6 +86,22 @@ Matrix Matrix::operator+(const Matrix& other) {
 	return res;
 }
 
+Matrix Matrix::operator*(const Matrix& other) {
+	Matrix res(width);
+
+	for (size_t i = 0; i < width; i++)
+	{
+		for (size_t j = 0; j < width; j++)
+		{
+			for (size_t k = 0; k < width; k++)
+			{
+				res.at(i, j) += at(i, k)*other.at(k, j);
+			}
+		}
+	}
+	return res;
+}
+
 Matrix Matrix::idMatrix(const size_t& _width) {
 	Matrix res(_width);
 	for (size_t i = 0; i < res.width; i++)
@@ -110,6 +126,18 @@ Matrix Matrix::nullMatrix(const size_t& _width) {
 		for (size_t j = 0; j < res.width; j++)
 		{
 			res.at(i, j) = 0;
+		}
+	}
+	return res;
+}
+
+static Matrix randMatrix(const size_t& _width) {
+	Matrix res(_width);
+	for (size_t i = 0; i < res.width; i++)
+	{
+		for (size_t j = 0; j < res.width; j++)
+		{
+			res.at(i, j) = rand()%10;
 		}
 	}
 	return res;

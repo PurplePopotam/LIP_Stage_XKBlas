@@ -16,10 +16,14 @@ class Matrix {
 		Matrix operator=(const Matrix& other);
 		Matrix& operator=(Matrix&& other);
 		Matrix operator+(const Matrix& other);
+
+		Matrix operator*(const Matrix& other);
+
 		void display();
 
 		static Matrix nullMatrix(const size_t& width);
 		static Matrix idMatrix(const size_t& width);
+		static Matrix randMatrix(const size_t& width);
 
 		inline size_t getWidth() { return width; }
 

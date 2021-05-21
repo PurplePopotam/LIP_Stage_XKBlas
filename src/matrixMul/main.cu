@@ -25,8 +25,6 @@ int main(int argc, char** argv) {
 	dim3 BLOCK_SIZE(THREADS_NUMBER, THREADS_NUMBER, 1);
 	dim3 GRID_SIZE((N/THREADS_NUMBER) + 1, (N / THREADS_NUMBER) + 1, 1);
 
-	std::cout << GRID_SIZE.x << " " << GRID_SIZE.y << std::endl;
-
 	std::chrono::duration<double, std::milli> millisecondsCPUhost;
 
 	cudaEvent_t startGPU;
@@ -58,19 +56,20 @@ int main(int argc, char** argv) {
 
 	
 	auto startCPUhost = std::chrono::high_resolution_clock::now();
-	*hostRes_C = *h_A + *h_B;
+	*hostRes_C = *h_A * *h_B;
 	auto stopCPUhost = std::chrono::high_resolution_clock::now();
 
 	millisecondsCPUhost = stopCPUhost - startCPUhost;
 
+	
 	cudaEventRecord(startGPU);
-	matrixAddV1 <<<GRID_SIZE, BLOCK_SIZE >>> (d_A, d_B, d_C, N);
+	matrixMulV1 <<<GRID_SIZE, BLOCK_SIZE >>> (d_A, d_B, d_C, N);
 	cudaEventRecord(stopGPU);
+	
 
 	cudaEventSynchronize(stopGPU);
 
 	cudaMemcpy(h_C->content, (void*)d_C, bytes, cudaMemcpyDeviceToHost);
-	
 
 	cudaEventElapsedTime(&milliseconds, startGPU, stopGPU);
 
@@ -81,10 +80,10 @@ int main(int argc, char** argv) {
 		h_C->display();
 	}
 	
-	//check(hostRes_C->content, h_C->content, N);
+	check(hostRes_C->content, h_C->content, N);
 
-	std::cout << std::endl << "Matrix addition of " << N << " elements took " << millisecondsCPUhost.count() << " ms to complete on the CPU. " << std::endl << std::endl;
-	std::cout << std::endl << "Matrix addition of " << N << " elements took " << milliseconds << " ms to complete on the GPU. " << std::endl << std::endl;
+	std::cout << std::endl << "Matrix multiplication of " << N << " elements took " << millisecondsCPUhost.count() << " ms to complete on the CPU. " << std::endl << std::endl;
+	std::cout << std::endl << "Matrix multiplication of " << N << " elements took " << milliseconds << " ms to complete on the GPU. " << std::endl << std::endl;
 
 	return 0;
 } 
