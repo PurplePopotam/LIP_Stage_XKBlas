@@ -131,7 +131,7 @@ Matrix Matrix::nullMatrix(const size_t& _width) {
 	return res;
 }
 
-static Matrix randMatrix(const size_t& _width) {
+Matrix Matrix::randMatrix(const size_t& _width) {
 	Matrix res(_width);
 	for (size_t i = 0; i < res.width; i++)
 	{

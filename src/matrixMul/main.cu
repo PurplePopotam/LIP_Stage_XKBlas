@@ -4,6 +4,7 @@
 #include "kernels.cuh"
 #include <iostream>
 
+
 void check(myFloat* A, myFloat* B, unsigned int N) {
 	for (size_t i = 0; i < N; i++)
 	{
@@ -16,9 +17,8 @@ void check(myFloat* A, myFloat* B, unsigned int N) {
 
 int main(int argc, char** argv) {
 
-#define N atoi(argv[1])
-#define THREADS_NUMBER 32
 
+#define N atoi(argv[1])
 #define debug 0
 	
 	size_t bytes = sizeof(myFloat) * N * N;
@@ -45,8 +45,8 @@ int main(int argc, char** argv) {
 	cudaMalloc((void**)&d_B, bytes);
 	cudaMalloc((void**)&d_C, bytes);
 
-	*h_A = Matrix::idMatrix(N);
-	*h_B = Matrix::idMatrix(N);
+	*h_A = Matrix::randMatrix(N);
+	*h_B = Matrix::randMatrix(N);
 	*h_C = Matrix::nullMatrix(N);
 	*hostRes_C = Matrix::nullMatrix(N);
 
@@ -54,14 +54,14 @@ int main(int argc, char** argv) {
 	cudaMemcpy((void*)d_B, (void*)h_B->content, bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_C, (void*)h_C->content, bytes, cudaMemcpyHostToDevice);
 
-	
+	//CPU Matrix Multiplication
 	auto startCPUhost = std::chrono::high_resolution_clock::now();
-	*hostRes_C = *h_A * *h_B;
+	*hostRes_C = *h_A * *h_B;	
 	auto stopCPUhost = std::chrono::high_resolution_clock::now();
 
 	millisecondsCPUhost = stopCPUhost - startCPUhost;
-
 	
+	//GPU Matrix Multiplication
 	cudaEventRecord(startGPU);
 	matrixMulV1 <<<GRID_SIZE, BLOCK_SIZE >>> (d_A, d_B, d_C, N);
 	cudaEventRecord(stopGPU);
