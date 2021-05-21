@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
 
 
 #define N atoi(argv[1])
-#define debug 0
+#define debug 1
 	
 	size_t bytes = sizeof(myFloat) * N * N;
 	dim3 BLOCK_SIZE(THREADS_NUMBER, THREADS_NUMBER, 1);
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 	
 	//GPU Matrix Multiplication
 	cudaEventRecord(startGPU);
-	matrixMulV1 <<<GRID_SIZE, BLOCK_SIZE >>> (d_A, d_B, d_C, N);
+	matrixMulV2<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
 	cudaEventRecord(stopGPU);
 	
 
