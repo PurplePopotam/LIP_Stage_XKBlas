@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
 
 
 #define N atoi(argv[1])
-#define debug 1
+#define debug 0
 	
 	size_t bytes = sizeof(myFloat) * N * N;
 	dim3 BLOCK_SIZE(THREADS_NUMBER, THREADS_NUMBER, 1);
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 	
 	//GPU Matrix Multiplication
 	cudaEventRecord(startGPU);
-	matrixMulV2<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
+	matrixMulV3<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
 	cudaEventRecord(stopGPU);
 	
 
@@ -81,6 +81,9 @@ int main(int argc, char** argv) {
 	}
 	
 	check(hostRes_C->content, h_C->content, N);
+
+	cudaFree((void*)d_A); cudaFree((void*)d_B); cudaFree((void*)d_C);
+	d_A = nullptr; d_B = nullptr; d_C = nullptr;
 
 	std::cout << std::endl << "Matrix multiplication of " << N << " elements took " << millisecondsCPUhost.count() << " ms to complete on the CPU. " << std::endl << std::endl;
 	std::cout << std::endl << "Matrix multiplication of " << N << " elements took " << milliseconds << " ms to complete on the GPU. " << std::endl << std::endl;
