@@ -87,6 +87,6 @@ int main(int argc, char** argv) {
 
 	std::cout << std::endl << "Matrix multiplication of " << N << " elements took " << millisecondsCPUhost.count() << " ms to complete on the CPU. " << std::endl << std::endl;
 	std::cout << std::endl << "Matrix multiplication of " << N << " elements took " << milliseconds << " ms to complete on the GPU. " << std::endl << std::endl;
-
+	//Test push multiple remotes
 	return 0;
 } 
