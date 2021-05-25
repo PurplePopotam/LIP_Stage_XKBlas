@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
         std::cout << std::endl;
         std::cout << "     " << i << "    " << " |     " << millisecondsCPUhost.count() << " ms " << "    |       " << milliseconds << " ms " << "    |      " << millisecondsCPUdevice.count() << " ms " << "      |      " << millisecondsDeviceHostCopy.count() << " ms" << std::endl;
 
-        cudaFree(&d_a); cudaFree(&d_b); cudaFree(&d_c);
+        cudaFree((void*)d_a); cudaFree((void*)d_b); cudaFree((void*)d_c);
         delete(h_a); delete(h_b); delete(h_c);
     }
 
