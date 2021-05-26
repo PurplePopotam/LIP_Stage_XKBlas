@@ -1,6 +1,6 @@
 /* C source code is found in dgemm_example.c */
 
-int min(x, y) {
+int min(int x, int y) {
     if (x < y) {
         return x;
     }
