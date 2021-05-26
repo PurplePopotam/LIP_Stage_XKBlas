@@ -1,6 +1,13 @@
 /* C source code is found in dgemm_example.c */
 
-#define min(x,y) (((x) < (y)) ? (x) : (y))
+int min(x, y) {
+    if (x < y) {
+        return x;
+    }
+    else {
+        return y;
+    }
+}
 
 #include <stdio.h>
 #include <stdlib.h>
