@@ -3,7 +3,6 @@
 #include <chrono>
 #include "kernels.cuh"
 #include <iostream>
-#include "mkl.h"
 
 void check(myFloat* A, myFloat* B, unsigned int N) {
 	for (size_t i = 0; i < N; i++)
@@ -64,7 +63,7 @@ int main(int argc, char** argv) {
 	
 	//GPU Matrix Multiplication
 	cudaEventRecord(startGPU);
-	matrixMulV3<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
+	MatrixMulKernel<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
 	cudaEventRecord(stopGPU);
 	
 
@@ -75,8 +74,6 @@ int main(int argc, char** argv) {
 	cudaEventElapsedTime(&milliseconds, startGPU, stopGPU);
 
 	if (debug) {
-		std::cout << "CPU result : " << std::endl << std::endl;
-		display(cpu_C, N);
 		std::cout << "GPU result : " << std::endl << std::endl;
 		h_C->display();
 	}
