@@ -1,7 +1,7 @@
 ﻿#ifndef __MATRIX_CUH__
 #define __MATRIX_CUH__
 
-typedef int myFloat;
+typedef double myFloat;
 
 class Matrix {
 
