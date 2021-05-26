@@ -12,12 +12,14 @@ int min(int x, int y) {
 #include <stdio.h>
 #include <stdlib.h>
 #include "mkl.h"
+#include <chrono>
 
 int main()
 {
     double* A, * B, * C;
     int m, n, k, i, j;
     double alpha, beta;
+    std::chrono::duration<double, std::milli> millisecondsCPUhost;
 
     printf("\n This example computes real matrix C=alpha*A*B+beta*C using \n"
         " Intel(R) MKL function dgemm, where A, B, and  C are matrices and \n"
@@ -55,8 +57,12 @@ int main()
     }
 
     printf(" Computing matrix product using Intel(R) MKL dgemm function via CBLAS interface \n\n");
+    auto startCPUhost = std::chrono::high_resolution_clock::now();
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
         m, n, k, alpha, A, k, B, n, beta, C, n);
+    auto stopCPUhost = std::chrono::high_resolution_clock::now();
+    
+    millisecondsCPUhost = stopCPUhost - startCPUhost;
     printf("\n Computations completed.\n\n");
 
     printf(" Top left corner of matrix A: \n");
@@ -88,6 +94,6 @@ int main()
     mkl_free(B);
     mkl_free(C);
 
-    printf(" Example completed. \n\n");
+    printf(" Example completed : the matrix multiplication took " << millisecondsCPUhost.count() << " ms. \n\n");
     return 0;
 }
