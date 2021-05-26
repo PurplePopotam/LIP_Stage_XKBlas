@@ -75,8 +75,6 @@ int main(int argc, char** argv) {
 	cudaEventElapsedTime(&milliseconds, startGPU, stopGPU);
 
 	if (debug) {
-		std::cout << "CPU result : " << std::endl << std::endl;
-		display(cpu_C, N);
 		std::cout << "GPU result : " << std::endl << std::endl;
 		h_C->display();
 	}
