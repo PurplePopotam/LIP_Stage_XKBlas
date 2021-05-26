@@ -4,7 +4,7 @@
 #include <cuda_runtime.h>
 #include "matrix.cuh"
 
-#define THREADS_NUMBER 2
+#define THREADS_NUMBER 32
 
 __global__ void matrixAddV1(myFloat* A, myFloat* B, myFloat* C, unsigned int N);
 

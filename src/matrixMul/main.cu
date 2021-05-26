@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 	
 	//GPU Matrix Multiplication
 	cudaEventRecord(startGPU);
-	MatrixMulKernel<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
+	matrixMulV3<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
 	cudaEventRecord(stopGPU);
 	
 
