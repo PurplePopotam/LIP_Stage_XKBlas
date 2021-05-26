@@ -8,11 +8,11 @@
 
 __global__ void matrixAddV1(myFloat* A, myFloat* B, myFloat* C, unsigned int N);
 
-__global__ void matrixMulV1(myFloat* A, myFloat* B, myFloat* C, unsigned int N);	//Naive implementation	
+__global__ void matrixMulV3(myFloat* A, myFloat* B, myFloat* C, unsigned int N);	//Not tiles with a tmp variable instead of 2N accesses
 
-__global__ void matrixMulV2(myFloat* A, myFloat* B, myFloat* C, unsigned int N);	//Cache-tiled version, no coaelesced access
+__global__ void matrixMulV4f(float* A, float* B, float* C, unsigned int N);	//prefecth 4 items from A, float version
 
-__global__ void matrixMulV3(myFloat* A, myFloat* B, myFloat* C, unsigned int N);	//With a tmp variable instead of N^2 accesses
+__global__ void matrixMulV4d(double* A, double* B, double* C, unsigned int N); //prefecth 4 items from A, double version
 
-__global__ void MatrixMulKernel(float* Md, float* Nd, float* Pd, int Width);
 #endif
+
