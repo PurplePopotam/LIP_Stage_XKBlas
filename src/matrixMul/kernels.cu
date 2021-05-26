@@ -22,10 +22,9 @@ __global__ void matrixMulV3(myFloat* A, myFloat* B, myFloat* C, unsigned int N) 
 	myFloat tmp = 0;
 
 	while(tidX < N && tidY < N) {
-		for (size_t k = 0; k < N; k+=4)
+		for (size_t k = 0; k < N; k++)
 		{
-			float4
-			tmp += A[tidY * N + k] * B[k * N + tidX];
+			tmp += A[tidY + k] * B[k * N + tidX];
 		}
 		C[tidY * N + tidX] = tmp;
 		tidX += strideX;
@@ -44,11 +43,11 @@ __global__ void matrixMulV4f(float* A, float* B, float* C, unsigned int N) {
 	while (tidX < N && tidY < N) {
 		for (size_t k = 0; k < N; k += 4)
 		{
-			float4 a_tmp = reinterpret_cast<float4*>(&a[row * N + i])[0];
+			float4 a_tmp = reinterpret_cast<float4*>(&A[tidY * N + k])[0];
 			tmp += a_tmp.x * B[k * N + tidX];
 			tmp += a_tmp.y * B[(k + 1) * N + tidX];
-			tmp += a_tmp.z * B[(k + 1) * N + tidX];
-			tmp += a_tmp.w * B[(k + 1) * N + tidX];
+			tmp += a_tmp.z * B[(k + 2) * N + tidX];
+			tmp += a_tmp.w * B[(k + 3) * N + tidX];
 		}
 		C[tidY * N + tidX] = tmp;
 		tidX += strideX;
