@@ -24,6 +24,7 @@ class Matrix {
 		static Matrix nullMatrix(const size_t& width);
 		static Matrix idMatrix(const size_t& width);
 		static Matrix randMatrix(const size_t& width);
+		static Matrix sparseMatrix(const size_t& width, const float& r); //r represents the matrix occupation rate
 
 		inline size_t getWidth() { return width; }
 

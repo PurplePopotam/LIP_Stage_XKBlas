@@ -53,10 +53,11 @@ int main(int argc, char** argv) {
 
 	std::cout << "Initializing Matrix data...\n\n";
 
-	*h_A = Matrix::randMatrix(N);
+	*h_A = Matrix::sparseMatrix(N, 0.5);
 	*h_B = Matrix::randMatrix(N);
 	*h_C = Matrix::nullMatrix(N);
 
+	/*
 	cudaMemcpy((void*)d_A, (void*)h_A->content, bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_B, (void*)h_B->content, bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_C, (void*)h_C->content, bytes, cudaMemcpyHostToDevice);
@@ -84,6 +85,9 @@ int main(int argc, char** argv) {
 	d_A = nullptr; d_B = nullptr; d_C = nullptr;
 
 	std::cout << std::endl << "Matrix multiplication of " << N << " elements took " << milliseconds << " ms to complete on the GPU. " << std::endl << std::endl;
+	*/
+
+	h_A->display();
 
 	return 0;
 } 
