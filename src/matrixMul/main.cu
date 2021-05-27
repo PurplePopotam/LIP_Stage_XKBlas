@@ -51,30 +51,30 @@ int main(int argc, char** argv) {
 	cudaMalloc((void**)&d_A, bytes);
 	cudaMalloc((void**)&d_B, bytes);
 	cudaMalloc((void**)&d_C, bytes);
-	cudaMalloc((void**)&d_C_tiled, bytes);
+	//cudaMalloc((void**)&d_C_tiled, bytes);
 
 	std::cout << "Initializing Matrix data...\n\n";
 
 	*h_A = Matrix::randMatrix(N);
 	*h_B = Matrix::randMatrix(N);
 	*h_C = Matrix::nullMatrix(N);
-	*h_C_tiled = Matrix::nullMatrix(N);
+	//*h_C_tiled = Matrix::nullMatrix(N);
 
 	std::cout << "Done initialazing. \n\n";
 
 	cudaMemcpy((void*)d_A, (void*)h_A->content, bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_B, (void*)h_B->content, bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_C, (void*)h_C->content, bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy((void*)d_C_tiled, (void*)h_C_tiled->content, bytes, cudaMemcpyHostToDevice);
+	//cudaMemcpy((void*)d_C_tiled, (void*)h_C_tiled->content, bytes, cudaMemcpyHostToDevice);
 
 	//GPU tiled Matrix Multiplication
-	cudaEventRecord(startGPUtiled);
-	matrixMulV2<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C_tiled, N);
-	cudaEventRecord(stopGPUtiled);
+	//cudaEventRecord(startGPUtiled);
+	//matrixMulV2<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C_tiled, N);
+	//cudaEventRecord(stopGPUtiled);
 	
-	cudaEventSynchronize(stopGPUtiled);
+	//cudaEventSynchronize(stopGPUtiled);
 
-	cudaMemcpy((void*)h_C_tiled->content, (void*)d_C_tiled, bytes, cudaMemcpyDeviceToHost);
+	//cudaMemcpy((void*)h_C_tiled->content, (void*)d_C_tiled, bytes, cudaMemcpyDeviceToHost);
 
 	//GPU regular Matrix Multiplication with small optimizations
 	cudaEventRecord(startGPU);
@@ -85,20 +85,21 @@ int main(int argc, char** argv) {
 
 	cudaMemcpy((void*)h_C->content, (void*)d_C, bytes, cudaMemcpyDeviceToHost);
 
-	cudaEventElapsedTime(&millisecondsTiled, startGPUtiled, stopGPUtiled);
+	//cudaEventElapsedTime(&millisecondsTiled, startGPUtiled, stopGPUtiled);
 	cudaEventElapsedTime(&milliseconds, startGPU, stopGPU);
 
 	if (debug) {
 		std::cout << "GPU result : " << std::endl << std::endl;
 		h_C->display();
-		std::cout << "GPU tiled result : " << std::endl << std::endl;
-		h_C_tiled->display();
+		//std::cout << "GPU tiled result : " << std::endl << std::endl;
+		//h_C_tiled->display();
 	}
 	
-	check(h_C->content,h_C_tiled->content, N);
+	//check(h_C->content,h_C_tiled->content, N);
 	
 	//Freeing the memory
-
+	h_A->display();
+	
 	cudaFree((void*)d_A); cudaFree((void*)d_B); cudaFree((void*)d_C); cudaFree((void*)d_C_tiled);
 	free(h_A); free(h_B); free(h_C); free(h_C_tiled);
 	d_A = nullptr; d_B = nullptr; d_C = nullptr; d_C_tiled = nullptr;
