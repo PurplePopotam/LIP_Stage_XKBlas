@@ -2,7 +2,7 @@
 #define __KERNELS_CUH__
 
 #include <cuda_runtime.h>
-#include "matrix.cuh"
+#include "matrix.hpp"
 
 #define THREADS_NUMBER 32
 

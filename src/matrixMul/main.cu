@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
 
 	//GPU regular Matrix Multiplication with small optimizations
 	cudaEventRecord(startGPU);
-	matrixMulV3<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
+	matrixMulV4f<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
 	cudaEventRecord(stopGPU);
 	
 	cudaEventSynchronize(stopGPU);
