@@ -74,6 +74,8 @@ int main(int argc, char** argv) {
 	
 	cudaEventSynchronize(stopGPUtiled);
 
+	cudaMemcpy((void*)h_C_tiled->content, (void*)d_C_tiled, bytes, cudaMemcpyDeviceToHost);
+
 	//GPU regular Matrix Multiplication with small optimizations
 	cudaEventRecord(startGPU);
 	matrixMulV3<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
@@ -81,9 +83,7 @@ int main(int argc, char** argv) {
 	
 	cudaEventSynchronize(stopGPU);
 
-	cudaMemcpy(h_C->content, (void*)d_C, bytes, cudaMemcpyDeviceToHost);
-
-	cudaMemcpy(h_C_tiled->content, (void*)d_C_tiled, bytes, cudaMemcpyDeviceToHost);
+	cudaMemcpy((void*)h_C->content, (void*)d_C, bytes, cudaMemcpyDeviceToHost);
 
 	cudaEventElapsedTime(&millisecondsTiled, startGPUtiled, stopGPUtiled);
 	cudaEventElapsedTime(&milliseconds, startGPU, stopGPU);
@@ -97,6 +97,8 @@ int main(int argc, char** argv) {
 	
 	check(h_C->content,h_C_tiled->content, N);
 	
+	//Freeing the memory
+
 	cudaFree((void*)d_A); cudaFree((void*)d_B); cudaFree((void*)d_C); cudaFree((void*)d_C_tiled);
 	free(h_A); free(h_B); free(h_C); free(h_C_tiled);
 	d_A = nullptr; d_B = nullptr; d_C = nullptr; d_C_tiled = nullptr;
