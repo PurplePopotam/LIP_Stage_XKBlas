@@ -39,6 +39,7 @@ int main(int argc, char** argv) {
 	cudaEventCreate(&startGPUtiled); cudaEventCreate(&startGPU);
 	cudaEventCreate(&stopGPUtiled); cudaEventCreate(&stopGPU);
 	float millisecondsTiled, milliseconds;
+	std::chrono::duration<double, std::milli> millisecondsCPUinit;
 
 	Matrix* h_A, * h_B, * h_C, * h_C_tiled;
 	myFloat* d_A, * d_B, * d_C, * d_C_tiled;
@@ -54,14 +55,17 @@ int main(int argc, char** argv) {
 	cudaMalloc((void**)&d_C_tiled, bytes);
 
 	std::cout << "Initializing Matrix data...\n\n";
-
-	*h_A = Matrix::randMatrix(N);
-	*h_B = Matrix::randMatrix(N);
-	*h_C = Matrix::nullMatrix(N);
-	*h_C_tiled = Matrix::nullMatrix(N);
-
+	auto startCPU = std::chrono::high_resolution_clock::now();
+	h_A->randMatrix(N);
+	h_B->randMatrix(N);
+	h_C->nullMatrix(N);
+	h_C_tiled->nullMatrix(N);
+	auto stopCPU = std::chrono::high_resolution_clock::now();
 	std::cout << "Done initialazing. \n\n";
 
+	millisecondsCPUinit = stopCPUhost - startCPUhost;
+
+	std::cout << "Init took " << millisecondsCPUinit.count() << " ms.\n\n"
 	cudaMemcpy((void*)d_A, (void*)h_A->content, bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_B, (void*)h_B->content, bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_C, (void*)h_C->content, bytes, cudaMemcpyHostToDevice);
@@ -89,9 +93,9 @@ int main(int argc, char** argv) {
 	cudaEventElapsedTime(&milliseconds, startGPU, stopGPU);
 
 	if (debug) {
-		std::cout << "GPU result : " << std::endl << std::endl;
+		std::cout << "GPU result : \n\n";
 		h_C->display();
-		std::cout << "GPU tiled result : " << std::endl << std::endl;
+		std::cout << "GPU tiled result : \n\n";
 		h_C_tiled->display();
 	}
 	
@@ -104,7 +108,7 @@ int main(int argc, char** argv) {
 	d_A = nullptr; d_B = nullptr; d_C = nullptr; d_C_tiled = nullptr;
 	h_A = nullptr; h_B = nullptr; h_C = nullptr; h_C_tiled = nullptr;
 	
-	std::cout << std::endl << "Tiled matrix multiplication of " << N << " elements took " << millisecondsTiled << " ms to complete on the GPU. " << std::endl << std::endl;
-	std::cout << std::endl << "Regular matrix multiplication of " << N << " elements took " << milliseconds << " ms to complete on the GPU." << std::endl;
+	std::cout << std::endl << "Tiled matrix multiplication of " << N << " elements took " << millisecondsTiled << " ms to complete on the GPU.\n\n";
+	std::cout << std::endl << "Regular matrix multiplication of " << N << " elements took " << milliseconds << " ms to complete on the GPU.\n\n";
 	return 0;
 } 

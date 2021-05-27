@@ -95,60 +95,53 @@ Matrix Matrix::operator*(const Matrix& other) {
 	return res;
 }
 
-Matrix Matrix::idMatrix(const size_t& _width) {
-	Matrix res(_width);
-	for (size_t i = 0; i < res.width; i++)
+void Matrix::idMatrix() {
+	for (size_t i = 0; i < width; i++)
 	{
-		for (size_t j = 0; j < res.width; j++)
+		for (size_t j = 0; j < width; j++)
 		{
 			if (i == j) {
-				res.at(i, j) = 1;
+				this->at(i, j) = 1;
 			}
 			else {
-				res.at(i, j) = 0;
+				this->at(i, j) = 0;
 			}
 		}
 	}
-	return res;
 }
 
-Matrix Matrix::nullMatrix(const size_t& _width) {
-	Matrix res(_width);
-	for (size_t i = 0; i < res.width; i++)
+void Matrix::nullMatrix() {
+	for (size_t i = 0; i < width; i++)
 	{
-		for (size_t j = 0; j < res.width; j++)
+		for (size_t j = 0; j < width; j++)
 		{
-			res.at(i, j) = 0;
+			this->at(i, j) = 0;
 		}
 	}
-	return res;
 }
 
-Matrix Matrix::randMatrix(const size_t& _width) {
-	Matrix res(_width);
-	for (size_t i = 0; i < res.width; i++)
+void Matrix::randMatrix(const myFloat& min, const myFloat& max) {
+
+	for (size_t i = 0; i < width; i++)
 	{
-		for (size_t j = 0; j < res.width; j++)
+		for (size_t j = 0; j < width; j++)
 		{
-			res.at(i, j) = rand()%10 + myFloat(rand()) / RAND_MAX;
+			this->at(i, j) = rand()%int(max) + myFloat(rand()) / RAND_MAX + min;
 		}
 	}
-	return res;
 }
 
-Matrix Matrix::sparseMatrix(const size_t& _width, const float& r) {
-	Matrix res(_width);
-	for (size_t i = 0; i < res.width; i++)
+void Matrix::sparseMatrix(const float& r) {
+	for (size_t i = 0; i < width; i++)
 	{
-		for (size_t j = 0; j < res.width; j++)
+		for (size_t j = 0; j < width; j++)
 		{
 			if (float(rand() % 100) / 100.0 < r) {
-				res.at(i, j) = rand() % 10 + myFloat(rand()) / RAND_MAX;
+				this->at(i, j) = rand() % 10 + myFloat(rand()) / RAND_MAX;
 			}
 			else {
-				res.at(i, j) = 0;
+				this->at(i, j) = 0;
 			}
 		}
 	}
-	return res;
 }
