@@ -13,7 +13,7 @@ __global__ void matrixAdd(myFloat* A, myFloat* B, myFloat* C, unsigned int N) {
 	
 }
 
-__global__ void matrixMulV2(const myFloat* a, const myFloat* b, myFloat* c) {
+__global__ void matrixMulV2(myFloat* a, myFloat* b, myFloat* c, unsigned int N) {
 	int row = blockIdx.y * blockDim.y + threadIdx.y;
 	int col = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -38,7 +38,7 @@ __global__ void matrixMulV2(const myFloat* a, const myFloat* b, myFloat* c) {
 	c[row * N + col] = tmp;
 }
 
-__global__ void matrixMulV3(const myFloat* A, const myFloat* B, myFloat* C, unsigned int N) {
+__global__ void matrixMulV3(myFloat* A, myFloat* B, myFloat* C, unsigned int N) {
 	unsigned int tidX = threadIdx.x + blockDim.x * blockIdx.x;
 	unsigned int tidY = threadIdx.y + blockDim.y * blockIdx.y;
 	unsigned int strideX = blockDim.x * gridDim.x;
@@ -57,7 +57,7 @@ __global__ void matrixMulV3(const myFloat* A, const myFloat* B, myFloat* C, unsi
 	}
 }
 
-__global__ void matrixMulV4f(const float* A, const float* B, float* C, unsigned int N) {
+__global__ void matrixMulV4f(float* A, float* B, float* C, unsigned int N) {
 	unsigned int tidX = threadIdx.x + blockDim.x * blockIdx.x;
 	unsigned int tidY = threadIdx.y + blockDim.y * blockIdx.y;
 	unsigned int strideX = blockDim.x * gridDim.x;
@@ -80,7 +80,7 @@ __global__ void matrixMulV4f(const float* A, const float* B, float* C, unsigned 
 	}
 }
 
-__global__ void matrixMulV4d(const double* A, const double* B, double* C, unsigned int N) {
+__global__ void matrixMulV4d(double* A, double* B, double* C, unsigned int N) {
 	unsigned int tidX = threadIdx.x + blockDim.x * blockIdx.x;
 	unsigned int tidY = threadIdx.y + blockDim.y * blockIdx.y;
 	unsigned int strideX = blockDim.x * gridDim.x;
@@ -104,7 +104,7 @@ __global__ void matrixMulV4d(const double* A, const double* B, double* C, unsign
 	}
 }
 
-__global__ void matrixMulV4i(const int* A, const int* B, int* C, unsigned int N) {
+__global__ void matrixMulV4i(int* A, int* B, int* C, unsigned int N) {
 	unsigned int tidX = threadIdx.x + blockDim.x * blockIdx.x;
 	unsigned int tidY = threadIdx.y + blockDim.y * blockIdx.y;
 	unsigned int strideX = blockDim.x * gridDim.x;
