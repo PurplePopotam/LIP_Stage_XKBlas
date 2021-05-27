@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
 	cudaMemcpy((void*)d_C, (void*)h_C->content, bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_C_tiled, (void*)h_C_tiled->content, bytes, cudaMemcpyHostToDevice);
 
-	GPU tiled Matrix Multiplication
+	//GPU tiled Matrix Multiplication
 	cudaEventRecord(startGPUtiled);
 	matrixMulV2<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C_tiled, N);
 	cudaEventRecord(stopGPUtiled);
@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
 
 	cudaMemcpy((void*)h_C->content, (void*)d_C, bytes, cudaMemcpyDeviceToHost);
 
-	//cudaEventElapsedTime(&millisecondsTiled, startGPUtiled, stopGPUtiled);
+	cudaEventElapsedTime(&millisecondsTiled, startGPUtiled, stopGPUtiled);
 	cudaEventElapsedTime(&milliseconds, startGPU, stopGPU);
 
 	if (debug) {
