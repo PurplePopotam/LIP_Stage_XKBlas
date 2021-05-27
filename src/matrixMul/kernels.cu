@@ -17,8 +17,8 @@ __global__ void matrixMulV2(myFloat* a, myFloat* b, myFloat* c, unsigned int N) 
 	int row = blockIdx.y * blockDim.y + threadIdx.y;
 	int col = blockIdx.x * blockDim.x + threadIdx.x;
 
-	__shared__ myFloat s_a[THREADS_NUMBER];
-	__shared__ myFloat s_b[THREADS_NUMBER];
+	__shared__ myFloat s_a[THREADS_NUMBER*THREADS_NUMBER];
+	__shared__ myFloat s_b[THREADS_NUMBER*THREADS_NUMBER];
 
 	myFloat tmp = 0;
 
