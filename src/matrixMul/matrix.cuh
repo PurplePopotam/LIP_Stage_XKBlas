@@ -21,10 +21,10 @@ class Matrix {
 
 		void display();
 
-		void Matrix nullMatrix();
-		void Matrix idMatrix();
+		void nullMatrix();
+		void idMatrix();
 		void randMatrix(const myFloat& min, const myFloat& max);
-		void Matrix sparseMatrix(const float& r); //r represents the matrix occupation rate
+		void sparseMatrix(const float& r); //r represents the matrix occupation rate
 
 		inline size_t getWidth() { return width; }
 

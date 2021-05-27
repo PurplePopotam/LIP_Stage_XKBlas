@@ -56,16 +56,16 @@ int main(int argc, char** argv) {
 
 	std::cout << "Initializing Matrix data...\n\n";
 	auto startCPU = std::chrono::high_resolution_clock::now();
-	h_A->randMatrix(N);
-	h_B->randMatrix(N);
-	h_C->nullMatrix(N);
-	h_C_tiled->nullMatrix(N);
+	h_A->randMatrix(0, 10);
+	h_B->randMatrix(0, 10);
+	h_C->nullMatrix();
+	h_C_tiled->nullMatrix();
 	auto stopCPU = std::chrono::high_resolution_clock::now();
 	std::cout << "Done initialazing. \n\n";
 
-	millisecondsCPUinit = stopCPUhost - startCPUhost;
+	millisecondsCPUinit = stopCPU - startCPU;
 
-	std::cout << "Init took " << millisecondsCPUinit.count() << " ms.\n\n"
+	std::cout << "Init took " << millisecondsCPUinit.count() << " ms.\n\n";
 	cudaMemcpy((void*)d_A, (void*)h_A->content, bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_B, (void*)h_B->content, bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_C, (void*)h_C->content, bytes, cudaMemcpyHostToDevice);
