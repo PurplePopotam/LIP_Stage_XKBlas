@@ -102,10 +102,10 @@ Matrix Matrix::idMatrix(const size_t& _width) {
 		for (size_t j = 0; j < res.width; j++)
 		{
 			if (i == j) {
-				res.at(i, j) = 1.0;
+				res.at(i, j) = 1;
 			}
 			else {
-				res.at(i, j) = 0.0;
+				res.at(i, j) = 0;
 			}
 		}
 	}
@@ -118,7 +118,7 @@ Matrix Matrix::nullMatrix(const size_t& _width) {
 	{
 		for (size_t j = 0; j < res.width; j++)
 		{
-			res.at(i, j) = 0.0;
+			res.at(i, j) = 0;
 		}
 	}
 	return res;
@@ -130,7 +130,7 @@ Matrix Matrix::randMatrix(const size_t& _width) {
 	{
 		for (size_t j = 0; j < res.width; j++)
 		{
-			res.at(i, j) = rand()%10 + float(rand()) / RAND_MAX;
+			res.at(i, j) = rand()%10 + myFloat(rand()) / RAND_MAX;
 		}
 	}
 	return res;
@@ -143,7 +143,7 @@ Matrix Matrix::sparseMatrix(const size_t& _width, const float& r) {
 		for (size_t j = 0; j < res.width; j++)
 		{
 			if (float(rand() % 100) / 100.0 < r) {
-				res.at(i, j) = rand() % 10 + float(rand()) / RAND_MAX;
+				res.at(i, j) = rand() % 10 + myFloat(rand()) / RAND_MAX;
 			}
 			else {
 				res.at(i, j) = 0;
