@@ -41,6 +41,7 @@ __global__ void matrixMulV4f(float* A, float* B, float* C, unsigned int N) {
 	myFloat tmp = 0;
 
 	while (tidX < N && tidY < N) {
+		
 		for (size_t k = 0; k < N; k += 4)
 		{
 			float4 a_tmp = reinterpret_cast<float4*>(&A[tidY * N + k])[0];
