@@ -51,36 +51,38 @@ int main(int argc, char** argv) {
 	cudaMalloc((void**)&d_A, bytes);
 	cudaMalloc((void**)&d_B, bytes);
 	cudaMalloc((void**)&d_C, bytes);
-	//cudaMalloc((void**)&d_C_tiled, bytes);
+	cudaMalloc((void**)&d_C_tiled, bytes);
 
 	std::cout << "Initializing Matrix data...\n\n";
 
 	*h_A = Matrix::randMatrix(N);
 	*h_B = Matrix::randMatrix(N);
 	*h_C = Matrix::nullMatrix(N);
-	//*h_C_tiled = Matrix::nullMatrix(N);
+	*h_C_tiled = Matrix::nullMatrix(N);
 
 	std::cout << "Done initialazing. \n\n";
 
 	cudaMemcpy((void*)d_A, (void*)h_A->content, bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_B, (void*)h_B->content, bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_C, (void*)h_C->content, bytes, cudaMemcpyHostToDevice);
-	//cudaMemcpy((void*)d_C_tiled, (void*)h_C_tiled->content, bytes, cudaMemcpyHostToDevice);
+	cudaMemcpy((void*)d_C_tiled, (void*)h_C_tiled->content, bytes, cudaMemcpyHostToDevice);
 
-	//GPU tiled Matrix Multiplication
-	//cudaEventRecord(startGPUtiled);
-	//matrixMulV2<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C_tiled, N);
-	//cudaEventRecord(stopGPUtiled);
+	GPU tiled Matrix Multiplication
+	cudaEventRecord(startGPUtiled);
+	matrixMulV2<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C_tiled, N);
+	cudaEventRecord(stopGPUtiled);
 	
-	//cudaEventSynchronize(stopGPUtiled);
+	cudaDeviceSynchronize();
+	cudaEventSynchronize(stopGPUtiled);
 
-	//cudaMemcpy((void*)h_C_tiled->content, (void*)d_C_tiled, bytes, cudaMemcpyDeviceToHost);
+	cudaMemcpy((void*)h_C_tiled->content, (void*)d_C_tiled, bytes, cudaMemcpyDeviceToHost);
 
 	//GPU regular Matrix Multiplication with small optimizations
 	cudaEventRecord(startGPU);
 	matrixMulV3<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
 	cudaEventRecord(stopGPU);
 	
+	cudaDeviceSynchronize();
 	cudaEventSynchronize(stopGPU);
 
 	cudaMemcpy((void*)h_C->content, (void*)d_C, bytes, cudaMemcpyDeviceToHost);
