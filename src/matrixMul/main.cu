@@ -33,7 +33,8 @@ int main(int argc, char** argv) {
 
 
 #define N atoi(argv[1])
-#define debug 1
+#define debug 0
+#define ITER 10
 	
 	size_t bytes = sizeof(myFloat) * N * N;
 	dim3 BLOCK_SIZE(THREADS_NUMBER, THREADS_NUMBER, 1);
@@ -43,82 +44,91 @@ int main(int argc, char** argv) {
 	cudaEvent_t stopGPU, stopGPUtiled;
 	cudaEventCreate(&startGPUtiled); cudaEventCreate(&startGPU);
 	cudaEventCreate(&stopGPUtiled); cudaEventCreate(&stopGPU);
-	float millisecondsTiled, milliseconds;
+	float millisecondsV3, millisecondsV4, millisecondsDeviceHostCopy;
 	std::chrono::duration<double, std::milli> millisecondsCPUinit;
 
-	Matrix* h_A, * h_B, * h_C, * h_C_tiled;
-	myFloat* d_A, * d_B, * d_C, * d_C_tiled;
-
-	h_A = new Matrix(N);
-	h_B = new Matrix(N);
-	h_C = new Matrix(N);
-	h_C_tiled = new Matrix(N);
-
-	cudaMalloc((void**)&d_A, bytes);
-	cudaMalloc((void**)&d_B, bytes);
-	cudaMalloc((void**)&d_C, bytes);
-	cudaMalloc((void**)&d_C_tiled, bytes);
-
-	std::cout << "Initializing Matrix data...\n\n";
-	auto startCPU = std::chrono::high_resolution_clock::now();
-	h_A->randMatrix(0, 10);
-	h_B->randMatrix(0, 10);
-	h_C->nullMatrix();
-	h_C_tiled->nullMatrix();
-	auto stopCPU = std::chrono::high_resolution_clock::now();
-	std::cout << "Done initialazing. \n\n";
-
-	millisecondsCPUinit = stopCPU - startCPU;
-
-	std::cout << "Init took " << millisecondsCPUinit.count() << " ms.\n\n";
-	cudaMemcpy((void*)d_A, (void*)h_A->content, bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy((void*)d_B, (void*)h_B->content, bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy((void*)d_C, (void*)h_C->content, bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy((void*)d_C_tiled, (void*)h_C_tiled->content, bytes, cudaMemcpyHostToDevice);
+	std::cout << "Matrix multiplication of " << N / 1000 << "K elements, using " << THREADS_PER_BLOCK << " threads per block. \n\n";
+	std::cout << "Iteration " << " | " << "host matrix init time" << " | " << "GPU V3 exec time" << " | " << "CPU V4 exec time" << " | " << "device -> host copy duration \n\n";
 	
-	//GPU tiled Matrix Multiplication
-	cudaEventRecord(startGPUtiled);
-	matrixMulV2<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C_tiled, N);
-	cudaEventRecord(stopGPUtiled);
-	
-	cudaEventSynchronize(stopGPUtiled);
+	for (size_t i = 0; i < ITER; i++)
+	{
+		Matrix* h_A, * h_B, * h_C, * h_C_tiled;
+		myFloat* d_A, * d_B, * d_C, * d_C_tiled;
 
-	cudaMemcpy((void*)h_C_tiled->content, (void*)d_C_tiled, bytes, cudaMemcpyDeviceToHost);
+		h_A = new Matrix(N);
+		h_B = new Matrix(N);
+		h_C = new Matrix(N);
+		h_C_tiled = new Matrix(N);
 
-	//GPU regular Matrix Multiplication with small optimizations
-	cudaEventRecord(startGPU);
-	matrixMulV3<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
-	cudaEventRecord(stopGPU);
-	
-	cudaEventSynchronize(stopGPU);
+		cudaMalloc((void**)&d_A, bytes);
+		cudaMalloc((void**)&d_B, bytes);
+		cudaMalloc((void**)&d_C, bytes);
+		cudaMalloc((void**)&d_C_tiled, bytes);
 
-	cudaMemcpy((void*)h_C->content, (void*)d_C, bytes, cudaMemcpyDeviceToHost);
+		auto startCPU = std::chrono::high_resolution_clock::now();
+		h_A->randMatrix(0, 10);
+		h_B->randMatrix(0, 10);
+		h_C->nullMatrix();
+		h_C_tiled->nullMatrix();
+		auto stopCPU = std::chrono::high_resolution_clock::now();
 
-	cudaEventElapsedTime(&millisecondsTiled, startGPUtiled, stopGPUtiled);
-	cudaEventElapsedTime(&milliseconds, startGPU, stopGPU);
+		millisecondsCPUinit = stopCPU - startCPU;
 
-	if (debug) {
-		std::cout << "GPU result : \n\n";
-		h_C->display(8);
-		std::cout << "GPU tiled result : \n\n";
-		h_C_tiled->display(8);
+		cudaMemcpy((void*)d_A, (void*)h_A->content, bytes, cudaMemcpyHostToDevice);
+		cudaMemcpy((void*)d_B, (void*)h_B->content, bytes, cudaMemcpyHostToDevice);
+		cudaMemcpy((void*)d_C, (void*)h_C->content, bytes, cudaMemcpyHostToDevice);
+		cudaMemcpy((void*)d_C_tiled, (void*)h_C_tiled->content, bytes, cudaMemcpyHostToDevice);
+
+		//GPU Matrix Multiplication V3
+		cudaEventRecord(startGPUtiled);
+		matrixMulV3 << <GRID_SIZE, BLOCK_SIZE >> > (d_A, d_B, d_C_tiled, N);
+		cudaEventRecord(stopGPUtiled);
+
+		cudaEventSynchronize(stopGPUtiled);
+
+		auto startDeviceHostCopy = std::chrono::high_resolution_clock::now();
+		cudaMemcpy((void*)h_C_tiled->content, (void*)d_C_tiled, bytes, cudaMemcpyDeviceToHost);
+		auto stopDeviceHostCopy = std::chrono::high_resolution_clock::now();
+
+		millisecondsDeviceHostCopy = stopDeviceHostCopy - startDeviceHostCopy;
+
+		//GPU Matrix multiplication with prefetch
+		cudaEventRecord(startGPU);
+		matrixMulV4f << <GRID_SIZE, BLOCK_SIZE >> > (d_A, d_B, d_C, N);
+		cudaEventRecord(stopGPU);
+
+		cudaEventSynchronize(stopGPU);
+
+		cudaMemcpy((void*)h_C->content, (void*)d_C, bytes, cudaMemcpyDeviceToHost);
+
+		cudaEventElapsedTime(&millisecondsV3, startGPUtiled, stopGPUtiled);
+		cudaEventElapsedTime(&millisecondsV4, startGPU, stopGPU);
+
+		if (debug) {
+
+			if (check(h_C->content, h_C_tiled->content, N, 0.001)) {
+				std::cout << "The operation is correct. \n\n";
+			}
+			else {
+				std::cout << "The operation is incorrect. \n\n";
+			}
+
+			std::cout << "GPU result : \n\n";
+			h_C->display(8);
+			std::cout << "GPU tiled result : \n\n";
+			h_C_tiled->display(8);
+		}
+
+		std::cout << "     " << i << "    " << " |     " << millisecondsCPUinit.count() << " ms " << "    |       " << millisecondsV3 << " ms " << "    |      " << millisecondsV4 << " ms " << "      |      " << millisecondsDeviceHostCopy.count() << " ms \n\n";
+
+		//Freeing the memory
+
+		cudaFree((void*)d_A); cudaFree((void*)d_B); cudaFree((void*)d_C); cudaFree((void*)d_C_tiled);
+		free(h_A); free(h_B); free(h_C); free(h_C_tiled);
+		d_A = nullptr; d_B = nullptr; d_C = nullptr; d_C_tiled = nullptr;
+		h_A = nullptr; h_B = nullptr; h_C = nullptr; h_C_tiled = nullptr;
+
 	}
-	
-	if(check(h_C->content,h_C_tiled->content, N, 0.001)){
-		std::cout << "The operation is correct. \n\n";
-	}
-	else{
-		std::cout << "The operation is incorrect. \n\n";
-	}
-	
-	//Freeing the memory
-	
-	cudaFree((void*)d_A); cudaFree((void*)d_B); cudaFree((void*)d_C); cudaFree((void*)d_C_tiled);
-	free(h_A); free(h_B); free(h_C); free(h_C_tiled);
-	d_A = nullptr; d_B = nullptr; d_C = nullptr; d_C_tiled = nullptr;
-	h_A = nullptr; h_B = nullptr; h_C = nullptr; h_C_tiled = nullptr;
-	
-	std::cout << std::endl << "Tiled matrix multiplication of " << N << " elements took " << millisecondsTiled << " ms to complete on the GPU.\n\n";
-	std::cout << std::endl << "Regular matrix multiplication of " << N << " elements took " << milliseconds << " ms to complete on the GPU.\n\n";
+		
 	return 0;
 } 
