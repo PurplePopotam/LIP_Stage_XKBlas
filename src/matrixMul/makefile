@@ -10,7 +10,7 @@ BLAS_LDFLAGS=-L${MKLROOT}/lib/intel64 -lmkl_intel_ilp64 -lmkl_sequential -lmkl_c
 all: $(EXEC)
 
 main: matrix.o kernels.o main.o
-	$(CC) -o main main.o matrix.o kernels.o ${BLAS_LDFLAGS}
+	$(CC) -lgomp -o main main.o matrix.o kernels.o ${BLAS_LDFLAGS}
 
 kernels.o: kernels.cu
 	$(CC) -c kernels.cu ${NVCCFLAGS} ${BLAS_CPPFLAGS} 

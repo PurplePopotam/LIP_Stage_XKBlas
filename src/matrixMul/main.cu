@@ -4,14 +4,19 @@
 #include "kernels.cuh"
 #include <iostream>
 
-void check(myFloat* A, myFloat* B, unsigned int N) {
+bool check(myFloat* A, myFloat* B, unsigned int N, double epsilon) {
+	double errMax = 0.0;
 	for (size_t i = 0; i < N; i++)
 	{
 		for (size_t j = 0; j < N; j++)
 		{
-			assert(A[i * N + j] == B[i * N + j]);
+			errMax = max(abs(A[i * N + j] - B[i * N + j]), errMax);
+			if(errMax > epsilon){
+				return false;
+			}
 		}
 	}
+	return true;
 }
 
 void display(myFloat* A, unsigned int N){
@@ -28,7 +33,7 @@ int main(int argc, char** argv) {
 
 
 #define N atoi(argv[1])
-#define debug 0
+#define debug 1
 	
 	size_t bytes = sizeof(myFloat) * N * N;
 	dim3 BLOCK_SIZE(THREADS_NUMBER, THREADS_NUMBER, 1);
@@ -73,7 +78,7 @@ int main(int argc, char** argv) {
 	
 	//GPU tiled Matrix Multiplication
 	cudaEventRecord(startGPUtiled);
-	matrixMulV2<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C_tiled, N);
+	matrixMulV3<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C_tiled, N);
 	cudaEventRecord(stopGPUtiled);
 	
 	cudaEventSynchronize(stopGPUtiled);
@@ -94,12 +99,17 @@ int main(int argc, char** argv) {
 
 	if (debug) {
 		std::cout << "GPU result : \n\n";
-		h_C->display();
+		h_C->display(8);
 		std::cout << "GPU tiled result : \n\n";
-		h_C_tiled->display();
+		h_C_tiled->display(8);
 	}
 	
-	//check(h_C->content,h_C_tiled->content, N);
+	if(check(h_C->content,h_C_tiled->content, N, 0.001)){
+		std::cout << "The operation is correct. \n\n";
+	}
+	else{
+		std::cout << "The operation is incorrect. \n\n";
+	}
 	
 	//Freeing the memory
 	
