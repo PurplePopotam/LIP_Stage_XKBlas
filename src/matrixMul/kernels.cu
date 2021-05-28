@@ -13,29 +13,32 @@ __global__ void matrixAdd(myFloat* A, myFloat* B, myFloat* C, unsigned int N) {
 	
 }
 
-__global__ void matrixMulV2(myFloat* a, myFloat* b, myFloat* c, unsigned int N) {
-	int row = blockIdx.y * blockDim.y + threadIdx.y;
-	int col = blockIdx.x * blockDim.x + threadIdx.x;
+__global__ void matrixMulV2(myFloat* A, myFloat* B, myFloat* C, unsigned int N) {
+	
+	__shared__ myFloat ds_A[THREADS_NUMBER][THREADS_NUMBER];
+	__shared__ myFloat ds_B[THREADS_NUMBER][THREADS_NUMBER];
 
-	__shared__ myFloat s_a[THREADS_NUMBER*THREADS_NUMBER];
-	__shared__ myFloat s_b[THREADS_NUMBER*THREADS_NUMBER];
+	int bx = blockIdx.x; int by = blockIdx.y;
+	int tx = threadIdx.x; int ty = threadIdx.y;
 
-	myFloat tmp = 0;
+	int row = by * blockDim.y + ty;
+	int col = bx * blockDim.x + tx;
 
-	for (int i = 0; i < N; i += blockDim.x) {
-		s_a[threadIdx.y * blockDim.x + threadIdx.x] = a[row * N + i + threadIdx.x];
-		s_b[threadIdx.y * blockDim.x + threadIdx.x] = b[i * N + threadIdx.y * N + col];
+	myFloat Cvalue = 0;
 
+	for(size_t t = 0; t < N/THREADS_NUMBER; t++){
+		ds_A[ty][tx] = A[row * N + t * THREADS_NUMBER + tx];
+		ds_B[ty][tx] = B[(t * THREADS_NUMBER + ty) * N + col];
+		
 		__syncthreads();
 
-		for (int j = 0; j < blockDim.x; j++) {
-			tmp += s_a[threadIdx.y * blockDim.x + j] * s_b[j * blockDim.x + threadIdx.x];
+		for(size_t i = 0; i < THREADS_NUMBER; i++){
+			Cvalue += ds_A[ty][i] * ds_B[i][tx];
 		}
 
 		__syncthreads();
 	}
-
-	c[row * N + col] = tmp;
+	C[row * N + col] = Cvalue;
 }
 
 __global__ void matrixMulV3(myFloat* A, myFloat* B, myFloat* C, unsigned int N) {
@@ -46,10 +49,10 @@ __global__ void matrixMulV3(myFloat* A, myFloat* B, myFloat* C, unsigned int N) 
 
 	myFloat tmp = 0;
 
-	while(tidX < N && tidY < N) {
+	if(tidX < N && tidY < N) {
 		for (size_t k = 0; k < N; k++)
 		{
-			tmp += A[tidY + k] * B[k * N + tidX];
+			tmp += A[tidY * N + k] * B[k * N + tidX];
 		}
 		C[tidY * N + tidX] = tmp;
 		tidX += strideX;
@@ -65,7 +68,7 @@ __global__ void matrixMulV4f(float* A, float* B, float* C, unsigned int N) {
 
 	float tmp = 0;
 
-	while (tidX < N && tidY < N) {
+	while(tidX < N && tidY < N) {
 		for (size_t k = 0; k < N; k += 4)
 		{
 			float4 a_tmp = reinterpret_cast<float4*>(&A[tidY * N + k])[0];

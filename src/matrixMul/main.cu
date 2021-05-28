@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
 	
 	//GPU tiled Matrix Multiplication
 	cudaEventRecord(startGPUtiled);
-	matrixMulV3<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C_tiled, N);
+	matrixMulV2<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C_tiled, N);
 	cudaEventRecord(stopGPUtiled);
 	
 	cudaEventSynchronize(stopGPUtiled);
@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
 
 	//GPU regular Matrix Multiplication with small optimizations
 	cudaEventRecord(startGPU);
-	matrixMulV4f<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
+	matrixMulV3<<<GRID_SIZE, BLOCK_SIZE>>> (d_A, d_B, d_C, N);
 	cudaEventRecord(stopGPU);
 	
 	cudaEventSynchronize(stopGPU);
