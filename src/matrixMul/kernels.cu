@@ -29,13 +29,13 @@ __global__ void matrixMulV2(myFloat* A, myFloat* B, myFloat* C, unsigned int N) 
 	// Step size used to iterate through the sub-matrices of B
 	int bStep = THREADS_NUMBER * N;
 
-	myFloat Cvalue = 0;
+	myFloat Csub = 0;
 
 	for (int a = aBegin, b = bBegin;a <= aEnd; a += aStep, b += bStep) {
 		// Shared memory for the sub-matrix of A
-		__shared__ float As[THREADS_NUMBER][THREADS_NUMBER];
+		__shared__ myFloat As[THREADS_NUMBER][THREADS_NUMBER];
 		// Shared memory for the sub-matrix of B
-		__shared__ float Bs[THREADS_NUMBER][THREADS_NUMBER];
+		__shared__ myFloat Bs[THREADS_NUMBER][THREADS_NUMBER];
 		// Load the matrices from global memory to shared memory;
 		// each thread loads one element of each matrix
 		As[ty][tx] = A[a + N * ty + tx];

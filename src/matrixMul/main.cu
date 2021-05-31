@@ -33,12 +33,12 @@ int main(int argc, char** argv) {
 
 
 #define N atoi(argv[1])
-#define debug 0
+#define debug 1
 #define ITER 10
 	
 	size_t bytes = sizeof(myFloat) * N * N;
 	dim3 BLOCK_SIZE(THREADS_NUMBER, THREADS_NUMBER, 1);
-	dim3 GRID_SIZE((N/THREADS_NUMBER) + 1, (N / THREADS_NUMBER) + 1, 1);
+	dim3 GRID_SIZE((N/THREADS_NUMBER), (N / THREADS_NUMBER), 1);
 
 	cudaEvent_t startGPU, startGPUtiled;
 	cudaEvent_t stopGPU, stopGPUtiled;
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
 	std::chrono::duration<double, std::milli> millisecondsCPUinit, millisecondsDeviceHostCopy;
 
 	std::cout << "Matrix multiplication of " << N / 1000 << "K elements, using " << THREADS_NUMBER << " threads per block. \n\n";
-	std::cout << "Iteration " << " | " << "host matrix init time" << " | " << "GPU V3 exec time" << " | " << "CPU V4 exec time" << " | " << "device -> host copy duration \n\n";
+	std::cout << "Iteration " << " | " << "host matrix init time" << " | " << "GPU tiled exec time" << " | " << "GPU V4 exec time" << " | " << "device -> host copy duration \n\n";
 	
 	for (size_t i = 0; i < ITER; i++)
 	{
@@ -66,8 +66,8 @@ int main(int argc, char** argv) {
 		cudaMalloc((void**)&d_C_tiled, bytes);
 
 		auto startCPU = std::chrono::high_resolution_clock::now();
-		h_A->randMatrix(0, 10);
-		h_B->randMatrix(0, 10);
+		h_A->randMatrix(0, 1);
+		h_B->randMatrix(0, 1);
 		h_C->nullMatrix();
 		h_C_tiled->nullMatrix();
 		auto stopCPU = std::chrono::high_resolution_clock::now();
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
 
 		//GPU Matrix multiplication with prefetch
 		cudaEventRecord(startGPU);
-		matrixMulV4f << <GRID_SIZE, BLOCK_SIZE >> > (d_A, d_B, d_C, N);
+		matrixMulV3 << <GRID_SIZE, BLOCK_SIZE >> > (d_A, d_B, d_C, N);
 		cudaEventRecord(stopGPU);
 
 		cudaEventSynchronize(stopGPU);
@@ -112,11 +112,6 @@ int main(int argc, char** argv) {
 			else {
 				std::cout << "The operation is incorrect. \n\n";
 			}
-
-			std::cout << "GPU result : \n\n";
-			h_C->display(8);
-			std::cout << "GPU tiled result : \n\n";
-			h_C_tiled->display(8);
 		}
 
 		std::cout << "     " << i << "    " << " |       " << millisecondsCPUinit.count() << " ms " << "     |    " << millisecondsV3 << " ms " << "   |    " << millisecondsV4 << " ms " << "  |    " << millisecondsDeviceHostCopy.count() << " ms \n\n";
