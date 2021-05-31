@@ -95,12 +95,12 @@ Matrix Matrix::operator*(const Matrix& other) {
 	return res;
 }
 
-Matrix Matrix::operator*(const myFloat& other) {
-	myFloat* res = new myFloat[this.width];
+myFloat* Matrix::operator*(myFloat* other) {
+	myFloat* res = new myFloat[this->width];
 
-	for (size_t i = 0; i < width; i++)
+	for (size_t i = 0; i < this->width; i++)
 	{
-		for (size_t k = 0; k < width; k++)
+		for (size_t k = 0; k < this->width; k++)
 		{
 			res[i] += at(i, k) * other[k];
 		}

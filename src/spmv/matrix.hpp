@@ -18,7 +18,7 @@ class Matrix {
 		Matrix operator+(const Matrix& other);
 
 		Matrix operator*(const Matrix& other);
-		myFloat* operator*(const myFloat& other);
+		myFloat* operator*(myFloat* other);
 
 		void display(unsigned int n);
 

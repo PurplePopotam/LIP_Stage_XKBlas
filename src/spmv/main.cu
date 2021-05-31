@@ -50,21 +50,21 @@ int main(int argc, char** argv) {
 	float milliseconds;
 	std::chrono::duration<double, std::milli> millisecondsCPU;
 
-	myFloat* v, res;
-	myFloat* d_A, d_v, d_res;
+	Matrix A(N);
+	myFloat* v,* res;
+	myFloat* d_A,* d_v,* d_res;
 
 	cudaMalloc((void**)&d_A, bytesMatrix);
 	cudaMalloc((void**)&d_v, bytesVector);
 	cudaMalloc((void**)&d_res, bytesVector);
 
-	A = new Matrix(N);
 	v = new myFloat[N];
 	res = new myFloat[N];
 	A.randMatrix(0, 1);
 	initVec(v, N, 0, 1);
 
 
-	cudaMemcpy((void*)d_A, (void*)A->content, bytesMatrix, cudaMemcpyHostToDevice);
+	//cudaMemcpy((void*)d_A, (void*)A->content, bytesMatrix, cudaMemcpyHostToDevice);
 	cudaMemcpy((void*)d_v, (void*)v, bytesVector, cudaMemcpyHostToDevice);
 	
 	res = A * v;
