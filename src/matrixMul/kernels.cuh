@@ -18,4 +18,5 @@ __global__ void matrixMulV4d(double* A, double* B, double* C, unsigned int N); /
 
 __global__ void matrixMulV4i(int* A, int* B, int* C, unsigned int N); //Not tiled, prefetch 4 items from A, int version
 
+__global__ void matrixVectorV1(myFloat* A, myFloat* v, unsigned int N);
 #endif
