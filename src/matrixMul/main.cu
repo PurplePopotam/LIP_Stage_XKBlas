@@ -44,10 +44,10 @@ int main(int argc, char** argv) {
 	cudaEvent_t stopGPU, stopGPUtiled;
 	cudaEventCreate(&startGPUtiled); cudaEventCreate(&startGPU);
 	cudaEventCreate(&stopGPUtiled); cudaEventCreate(&stopGPU);
-	float millisecondsV3, millisecondsV4, millisecondsDeviceHostCopy;
-	std::chrono::duration<double, std::milli> millisecondsCPUinit;
+	float millisecondsV3, millisecondsV4;
+	std::chrono::duration<double, std::milli> millisecondsCPUinit, millisecondsDeviceHostCopy;
 
-	std::cout << "Matrix multiplication of " << N / 1000 << "K elements, using " << THREADS_PER_BLOCK << " threads per block. \n\n";
+	std::cout << "Matrix multiplication of " << N / 1000 << "K elements, using " << THREADS_NUMBER << " threads per block. \n\n";
 	std::cout << "Iteration " << " | " << "host matrix init time" << " | " << "GPU V3 exec time" << " | " << "CPU V4 exec time" << " | " << "device -> host copy duration \n\n";
 	
 	for (size_t i = 0; i < ITER; i++)
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
 			h_C_tiled->display(8);
 		}
 
-		std::cout << "     " << i << "    " << " |     " << millisecondsCPUinit.count() << " ms " << "    |       " << millisecondsV3 << " ms " << "    |      " << millisecondsV4 << " ms " << "      |      " << millisecondsDeviceHostCopy.count() << " ms \n\n";
+		std::cout << "     " << i << "    " << " |       " << millisecondsCPUinit.count() << " ms " << "     |    " << millisecondsV3 << " ms " << "   |    " << millisecondsV4 << " ms " << "  |    " << millisecondsDeviceHostCopy.count() << " ms \n\n";
 
 		//Freeing the memory
 
