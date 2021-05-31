@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 
 
 #define N atoi(argv[1])
-#define debug 1
+#define debug 0
 #define ITER 10
 	
 	size_t bytes = sizeof(myFloat) * N * N;
