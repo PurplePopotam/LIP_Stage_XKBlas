@@ -79,9 +79,9 @@ int main(int argc, char** argv) {
 		cudaMemcpy((void*)d_C, (void*)h_C->content, bytes, cudaMemcpyHostToDevice);
 		cudaMemcpy((void*)d_C_tiled, (void*)h_C_tiled->content, bytes, cudaMemcpyHostToDevice);
 
-		//GPU Matrix Multiplication V3
+		//Tiled matrix multiplication
 		cudaEventRecord(startGPUtiled);
-		matrixMulV3 << <GRID_SIZE, BLOCK_SIZE >> > (d_A, d_B, d_C_tiled, N);
+		matrixMulV2<< <GRID_SIZE, BLOCK_SIZE >> > (d_A, d_B, d_C_tiled, N);
 		cudaEventRecord(stopGPUtiled);
 
 		cudaEventSynchronize(stopGPUtiled);
