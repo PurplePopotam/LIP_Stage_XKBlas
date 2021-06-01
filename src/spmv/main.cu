@@ -38,7 +38,7 @@ void display(myFloat* v, unsigned int N) {
 int main(int argc, char** argv) {
 
 #define N atoi(argv[1])
-#define debug 0
+#define debug 1
 
 	size_t bytesMatrix = sizeof(myFloat) * N * N;
 	size_t bytesVector = sizeof(myFloat) * N;
@@ -50,18 +50,19 @@ int main(int argc, char** argv) {
 	float milliseconds;
 	std::chrono::duration<double, std::milli> millisecondsCPU;
 
-	Matrix A(N);
+	Matrix* A;
 	myFloat* v,* resCPU, *resGPU;
 	myFloat* d_A,* d_v,* d_res;
 
 	cudaMalloc((void**)&d_A, bytesMatrix);
 	cudaMalloc((void**)&d_v, bytesVector);
 	cudaMalloc((void**)&d_res, bytesVector);
-
+	
+	A = new Matrix(N);
 	v = new myFloat[N];
 	resCPU = new myFloat[N];
-	resGPU = new myFloat[N]
-	A.randMatrix(0, 1);
+	resGPU = new myFloat[N];
+	A->randMatrix(0, 1);
 	initVec(v, N, 0, 1);
 
 
@@ -71,7 +72,7 @@ int main(int argc, char** argv) {
 
 	//CPU dense matrix/vector product
 	auto startCPU = std::chrono::high_resolution_clock::now();
-	resCPU = A * v;
+	resCPU = (*A) * v;
 	auto stopCPU = std::chrono::high_resolution_clock::now();
 
 	millisecondsCPU = stopCPU - startCPU;
@@ -88,16 +89,15 @@ int main(int argc, char** argv) {
 	cudaEventElapsedTime(&milliseconds, startGPU, stopGPU);
 
 	if (debug) {
-		if (check(resCPU, resGPU, 0.001)) {
-			std::cout << "The operation is correct.\n\n"
+		if (check(resCPU, resGPU, N, 0.001)) {
+			std::cout << "The operation is correct.\n\n";
 		}
 		else {
-			std::cout << "The operation is incorrect.\n\n"
+			std::cout << "The operation is incorrect.\n\n";
 		}
-		A.display(N);
-		display(v, N);
-		display(resCPU, N);
-		display(resGPU, N);
+		display(resCPU, 5);
+		std::cout << "\n\n";
+		display(resGPU, 5);
 	}
 
 	std::cout << "Iteration " << " | " << "CPU matrix/vector exec time" << " | " << "GPU matrix/vector exec time" << " | " << "GPU spmv exec time\n\n";

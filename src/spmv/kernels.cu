@@ -24,7 +24,7 @@ __global__ void matrixVectorV1(myFloat* A, myFloat* v, myFloat* res, unsigned in
 		__shared__ myFloat Bs[THREADS_NUMBER];
 
 		As[ty][tx] = A[a + N * ty + tx];
-		Bs[tx] = B[b + tx + ty];
+		Bs[tx] = v[b + tx + ty];
 
 		__syncthreads();
 
