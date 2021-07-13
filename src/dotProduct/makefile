@@ -1,11 +1,11 @@
-CC=NVCC
+CC=nvcc
 NVCCFLAGS=
 EXEC=main
 
 all: $(EXEC)
 
 main: kernels.o main.o
-	$(CC) -o main main.obj kernels.obj
+	$(CC) -o main main.o kernels.o
 
 kernels.o: kernels.cu
 	$(CC) -c kernels.cu $(NVCCFLAGS)
